@@ -128,9 +128,10 @@ $(document).ready(function () {
 <li><a href="#a-tentative-title-for-the-project">A tentative title for the project</a></li>
 <li><a href="#dataset">Dataset</a><ul>
 <li><a href="#source-httpwww.seanlahman.combaseball-archivestatistics">Source: <a href="http://www.seanlahman.com/baseball-archive/statistics/" class="uri">http://www.seanlahman.com/baseball-archive/statistics/</a></a></li>
-<li><a href="#description-mlb-data.-some-data-manipulation-will-be-done-to-get-desired-data-format-readme2014.txt">Description: MLB data. Some data manipulation will be done to get desired data format <a href="http:readme2014.txt">readme2014.txt</a></a></li>
+<li><a href="#description">Description:</a></li>
 <li><a href="#analysis-ideas">Analysis Ideas:</a></li>
 </ul></li>
+<li><a href="#sample-data">Sample Data</a></li>
 </ul></li>
 </ul>
 </div>
@@ -155,32 +156,37 @@ $(document).ready(function () {
 <div id="source-httpwww.seanlahman.combaseball-archivestatistics" class="section level3">
 <h3>Source: <a href="http://www.seanlahman.com/baseball-archive/statistics/" class="uri">http://www.seanlahman.com/baseball-archive/statistics/</a></h3>
 </div>
-<div id="description-mlb-data.-some-data-manipulation-will-be-done-to-get-desired-data-format-readme2014.txt" class="section level3">
-<h3>Description: MLB data. Some data manipulation will be done to get desired data format <a href="http:readme2014.txt">readme2014.txt</a></h3>
-</div>
-<div id="analysis-ideas" class="section level3">
-<h3>Analysis Ideas:</h3>
-<div id="find-out-which-predictors-are-useful-for-predicting-rank-or-winning-the-championship---salaries-win-loss-etc" class="section level4">
-<h4>Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Win, Loss, … etc</h4>
+<div id="description" class="section level3">
+<h3>Description:</h3>
+<p>This dataset contains pitching, hitting, and fielding statistics for Major League Baseball from 1871 through 2014. It includes data from the two current leagues (American and National), the four other “major” leagues (American Association, Union Association, Players League, and Federal League), and the National Association of 1871-1875. For more details, see <a href="http:readme2014.txt">readme2014.txt</a></p>
 <div id="potential-response-variables" class="section level5">
 <h5>Potential Response Variables</h5>
 <ul>
-<li>Rank Position in final standings</li>
-<li>WSWin World Series Winner (Y or N)</li>
-<li>LgWin League Champion(Y or N)</li>
+<li><code>Rank</code> Position in final standings</li>
+<li><code>WSWin</code> World Series Winner (Y or N)</li>
+<li><code>LgWin</code> League Champion(Y or N)</li>
 </ul>
 </div>
 <div id="selected-predictor-variables" class="section level5">
 <h5>Selected Predictor Variables</h5>
 <ul>
-<li>yearID Year</li>
-<li>W Wins</li>
-<li>L Losses</li>
-<li>salary Total Salary of the team</li>
-<li>totalSalary Total Salary of all teams in that year</li>
-<li>pctSalary Total Salary of the team as a proportion of the total salary of all teams in that year</li>
+<li><code>yearID</code> Year</li>
+<li><code>W</code> Wins</li>
+<li><code>L</code> Losses</li>
+<li><code>salary</code> Total Salary of the team</li>
+<li><code>totalSalary</code> Total Salary of all teams in that year</li>
+<li><code>pctSalary</code> Total Salary of the team as a proportion of the total salary of all teams in that year</li>
 </ul>
-<p>A description of the dataset. You do not necessarily have to list all the variables, but at least mention those of greatest importance. Background information on the dataset, including specific citation of its source. A brief statement of the business, science, research, or personal interest you have in the dataset that you hope to explore. Evidence that the data can be loaded into R. Load the data, and print the first few values of the response variable as evidence.</p>
+</div>
+</div>
+<div id="analysis-ideas" class="section level3">
+<h3>Analysis Ideas:</h3>
+<p>Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Win, Loss, … etc. The project will explore the effectiveness of different models (additive, interaction)</p>
+</div>
+</div>
+<div id="sample-data" class="section level2">
+<h2>Sample Data</h2>
+<p>The following <code>R</code> code load the <code>Teams.csv</code> and <code>Salaries.csv</code>. Some data manipulation are performed to get the total salary and the percent of total salary.</p>
 <pre class="r"><code>teams &lt;- read.csv(&quot;Teams.csv&quot;)
 salaries &lt;- read.csv(&quot;Salaries.csv&quot;)
 salries_by_team_year = aggregate(x=salaries$salary, by = list(salaries$teamID, salaries$yearID), FUN=sum)
@@ -230,9 +236,6 @@ head(mlb_data)</code></pre>
 ## 4         CAL 14427894   261964696 0.05507572
 ## 5         CHA  9846178   261964696 0.03758590
 ## 6         CHN 12702917   261964696 0.04849095</code></pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 
