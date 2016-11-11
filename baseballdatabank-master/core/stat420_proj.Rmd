@@ -1,0 +1,68 @@
+---
+title: 'STAT 420: Data Analysis Project: Analysis Proposal'
+author: "Fall 2016, Aaron Ray(aaronwr2), Aaron Rogers(aaronrr2), Michael Chan(mhchan3), Michael Johnson(mjohns44)"
+date: 'Due: Monday, November 14 by 11:59 PM CDT'
+output:
+  html_document:
+    toc: yes
+---
+
+# Analysis Proposal
+
+## Project Members
+
+- Aaron Ray(aaronwr2)
+- Aaron Rogers(aaronrr2)
+- Michael Chan(mhchan3)
+- Michael Johnson(mjohns44)
+
+## A tentative title for the project
+
+Statistical Approach of Predicting MLB Baseball Team Success
+
+## Dataset
+
+### Source: http://www.seanlahman.com/baseball-archive/statistics/
+
+### Description: MLB data. Some data manipulation will be done to get desired data format  [readme2014.txt](http:readme2014.txt)
+
+### Analysis Ideas:
+
+#### Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Win, Loss, ... etc
+
+##### Potential Response Variables
+
+- Rank           Position in final standings
+- WSWin          World Series Winner (Y or N)
+- LgWin          League Champion(Y or N)
+
+##### Selected Predictor Variables
+- yearID         Year
+- W              Wins
+- L              Losses
+- salary         Total Salary of the team
+- totalSalary    Total Salary of all teams in that year
+- pctSalary      Total Salary of the team as a proportion of the total salary of all teams in that year
+
+A description of the dataset. You do not necessarily have to list all the variables, but at least mention those of greatest importance.
+Background information on the dataset, including specific citation of its source.
+A brief statement of the business, science, research, or personal interest you have in the dataset that you hope to explore.
+Evidence that the data can be loaded into R. Load the data, and print the first few values of the response variable as evidence.
+
+```{r}
+teams <- read.csv("Teams.csv")
+salaries <- read.csv("Salaries.csv")
+salries_by_team_year = aggregate(x=salaries$salary, by = list(salaries$teamID, salaries$yearID), FUN=sum)
+colnames(salries_by_team_year) = c("teamID", "yearID", "salary")
+
+mlb_data = merge(teams, salries_by_team_year, by=c("yearID", "teamID") )
+mlb_data$salary = as.numeric(mlb_data$salary)
+
+total_salary_by_year = aggregate(mlb_data$salary, by = list(mlb_data$yearID), FUN=sum)
+colnames(total_salary_by_year) = c("yearID", "totalSalary")
+
+mlb_data = merge(mlb_data, total_salary_by_year, by = c("yearID"))
+mlb_data$pctSalary = mlb_data$salary / mlb_data$totalSalary
+head(mlb_data)
+```
+
