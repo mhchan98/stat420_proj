@@ -48,7 +48,7 @@ Find out which predictors are useful for predicting rank or winning the Champion
 
 ## Sample Data
 
-The following `R` code load the `Teams.csv` and `Salaries.csv`. Some data manipulation are performed to get the total salary and the percent of total salary.
+The following `R` code loads the `Teams.csv` and `Salaries.csv`. Some data manipulation are performed to get the total salary and the percent of total salary.
 
 ```{r}
 teams <- read.csv("Teams.csv")
