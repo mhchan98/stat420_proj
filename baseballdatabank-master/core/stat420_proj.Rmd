@@ -1,7 +1,7 @@
 ---
-title: 'STAT 420: Data Analysis Project: Analysis Proposal'
-author: "Fall 2016, Aaron Ray(aaronwr2), Aaron Rogers(aaronrr2), Michael Chan(mhchan3), Michael Johnson(mjohns44)"
-date: 'Due: Monday, November 14 by 11:59 PM CDT'
+title: 'STAT 420: Proposal for Data Analysis Project, Fall 2016'
+author: "Aaron Ray (aaronwr2), Aaron Rogers (aaronrr2), Michael Chan (mhchan3), Michael Johnson (mjohns44)"
+date: 'Monday, November 14, 2016'
 output:
   html_document:
     toc: yes
@@ -11,30 +11,35 @@ output:
 
 ## Project Members
 
-- Aaron Ray(aaronwr2)
-- Aaron Rogers(aaronrr2)
-- Michael Chan(mhchan3)
-- Michael Johnson(mjohns44)
+- Aaron Ray (aaronwr2)
+- Aaron Rogers (aaronrr2)
+- Michael Chan (mhchan3)
+- Michael Johnson (mjohns44)
 
-## A tentative title for the project
+## Proposed title for the project
 
-Statistical Approach of Predicting MLB Baseball Team Success
+**A Statistical Approach to Predicting Major League Baseball Team Success**
 
-## Dataset
+## Project Description
 
-### Source: http://www.seanlahman.com/baseball-archive/statistics/
+Major League Baseball was the first introduction many people in the United States had to the field of statistics.  To this day, children and adults alike recite batting averages for their favorite players, measure pitchers by their earned run average, and talk about how much money specific players earn.  Everyday people have spirited debates about baseball statistics, arguing for their own theories of which statistics predict victory on the baseball field. 
 
-### Description: 
+This project will parse over 140 years of data to find which combinations of baseball statistics have been the most accurate in predicting the championship team.
 
-This dataset contains pitching, hitting, and fielding statistics for Major League Baseball from 1871 through 2014.  It includes data from the two current leagues (American and National), the four other "major" leagues (American Association, Union Association, Players League, and Federal League), and the National Association of 1871-1875. For more details, see [readme2014.txt](http:readme2014.txt)
+## Description of Dataset
 
-##### Potential Response Variables
+The source of the data for this project: http://www.seanlahman.com/baseball-archive/statistics/
+
+This dataset contains pitching, hitting, and fielding statistics for Major League Baseball from 1871 through 2015.  It includes data from the two current leagues (American and National), the four other "major" leagues (American Association, Union Association, Players League, and Federal League), and the National Association of 1871-1875. For more details, see [readme2014.txt](http://seanlahman.com/files/database/readme2014.txt)
+
+### Potential Response Variables
 
 - `Rank`           Position in final standings
 - `WSWin`          World Series Winner (Y or N)
 - `LgWin`          League Champion(Y or N)
 
-##### Selected Predictor Variables
+### Selected Predictor Variables
+
 - `yearID`         Year
 - `W`              Wins
 - `L`              Losses
@@ -42,13 +47,13 @@ This dataset contains pitching, hitting, and fielding statistics for Major Leagu
 - `totalSalary`    Total Salary of all teams in that year
 - `pctSalary`      Total Salary of the team as a proportion of the total salary of all teams in that year
 
-### Analysis Ideas:
+## Analysis Ideas
 
-Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Win, Loss, ... etc.  The project will explore the effectiveness of different models (additive, interaction)
+Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Wins, Losses, etc.  The project will explore the effectiveness of different models (linear, polynomial, additive, and interaction).
 
 ## Sample Data
 
-The following `R` code loads the `Teams.csv` and `Salaries.csv`. Some data manipulation are performed to get the total salary and the percent of total salary.
+The following `R` code loads the `Teams.csv` and `Salaries.csv`. Some data manipulation is performed to compute the total salary and the percent of total salary.
 
 ```{r}
 teams <- read.csv("Teams.csv")
