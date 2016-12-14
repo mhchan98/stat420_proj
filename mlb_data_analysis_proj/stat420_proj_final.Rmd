@@ -299,7 +299,13 @@ plot(R_sq ~ Year, data = pctSalary_TimeAnalysis, xlab = "Year", ylab = "R-Square
 
 ## Topic 2: Pythagorean Theorem of Baseball
 
-The Pythagorean Theorem of Baseball states that the pct win can be predicted by runDifferential.  Let's see whether the simplest model is better than the slightly bigger model chosen by stepwise BIC
+The Pythagorean Theorem of Baseball states that the pct win can be predicted by runDifferential.  The quickest way to get an idea of the relationship between them is to plot it out.
+
+```{r}
+plot(WinPct~ runDifferential, data = mlb_lm_data, col = "darkgreen")
+```
+
+Judging by the plot above, there is an obviously strong relationship between `runDifferential` and `WinPct`. Let's see whether the simplest model is better than the slightly bigger model chosen by stepwise BIC
 
 ```{r}
     mlb_lm_year_filtered_data = mlb_lm_data[mlb_lm_data$yearID>=2001,]
@@ -442,7 +448,23 @@ Loocv RMSE Of main section Model
 (main_loocv_rmse = get_loocv_rmse(mlb_lm_both_bic))
 ```
 
-Note that the LOOCV RMSE of the Quadratic Model is `r quad_loocv_rmse`, which is less than the main section model one, `r main_loocv_rmse`.  This means that the Quadratic Model is better in predicting win percentage.  However, we kept the main model as it is much simpler.
+Note that the LOOCV RMSE of the Quadratic Model is `r quad_loocv_rmse`, which is less than the main section model one, `r main_loocv_rmse`.  This means that the Quadratic Model is better in predicting win percentage.  However, in viewing the plots of the quadratic terms below, we see several influential observations that appear to be the cause of a somewhat false quadratic relationship for the variables `BB`, `H`, and `attendance`. We therefore decided to keep the main model as it is simpler and more consistent with conventional wisdom.
+
+```{r }
+library(ggplot2)
+ggplot(data = mlb_lm_year_filtered_data, aes(x = mlb_lm_year_filtered_data$BB, y = mlb_lm_year_filtered_data$WinPct)) +
+  stat_smooth(method = "lm", se = FALSE, color = "green", formula = y ~ x) +
+  stat_smooth(method = "lm", se = FALSE, color = "blue", formula = y ~ x + I(x ^ 2)) +
+  geom_point(colour = "black", size = 3)
+ggplot(data = mlb_lm_year_filtered_data, aes(x = mlb_lm_year_filtered_data$attendance, y = mlb_lm_year_filtered_data$WinPct)) +
+  stat_smooth(method = "lm", se = FALSE, color = "green", formula = y ~ x) +
+  stat_smooth(method = "lm", se = FALSE, color = "blue", formula = y ~ x + I(x ^ 2)) +
+  geom_point(colour = "black", size = 3)
+ggplot(data = mlb_lm_year_filtered_data, aes(x = mlb_lm_year_filtered_data$H, y = mlb_lm_year_filtered_data$WinPct)) +
+  stat_smooth(method = "lm", se = FALSE, color = "green", formula = y ~ x) +
+  stat_smooth(method = "lm", se = FALSE, color = "blue", formula = y ~ x + I(x ^ 2)) +
+  geom_point(colour = "black", size = 3)
+```
 
 ## Checking Results of Final Model After Removing Influential Data Points
 
