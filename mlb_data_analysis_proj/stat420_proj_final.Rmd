@@ -26,7 +26,7 @@ output:
 
 ## Project Description and Goals
 
-Major League Baseball is the first introduction many people in the United States have to the field of statistics.  Children and adults alike recite batting averages for their favorite players, measure pitchers by their earned run average, and expect great seasons from teams loaded with high-salary players.  Everyday people have spirited debates about baseball statistics, arguing for their own theories of which statistics predict victory on the baseball field. 
+Major League Baseball is the first introduction many people in the United States have to the field of statistics.  Children and adults alike recite batting averages for their favorite players, measure pitchers by their earned run average, and expect great seasons from teams loaded with high-salary players.  Everyday people have spirited debates about baseball statistics, arguing for their own theories of which statistics predict victory on the baseball field. In this study, we have put several of these theories to the test, as well as identified the key components of a robust linear regression model capable of predicting the percentage of wins in a given season. The following three topics were taken into account.
 
 ### Team Payroll
 
