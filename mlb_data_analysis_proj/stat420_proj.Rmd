@@ -1,0 +1,144 @@
+---
+title: 'STAT 420: Proposal for Data Analysis Project, Fall 2016'
+author: "Aaron Ray (aaronwr2), Aaron Rogers (aaronrr2), Michael Chan (mhchan3), Michael Johnson (mjohns44)"
+date: 'Monday, November 14, 2016'
+output:
+  html_document:
+    toc: yes
+---
+
+# Analysis Proposal
+
+## Project Members
+
+- Aaron Ray (aaronwr2)
+- Aaron Rogers (aaronrr2)
+- Michael Chan (mhchan3)
+- Michael Johnson (mjohns44)
+
+## Proposed title for the project
+
+**A Statistical Approach to Predicting Major League Baseball Team Success**
+
+## Project Description
+
+Major League Baseball was the first introduction many people in the United States had to the field of statistics.  To this day, children and adults alike recite batting averages for their favorite players, measure pitchers by their earned run average, and talk about how much money specific players earn.  Everyday people have spirited debates about baseball statistics, arguing for their own theories of which statistics predict victory on the baseball field. 
+
+This project will parse over 140 years of data to find which combinations of baseball statistics have been the most accurate in predicting the championship team.
+
+## Description of Dataset
+
+The source of the data for this project: http://www.seanlahman.com/baseball-archive/statistics/
+
+This dataset contains pitching, hitting, and fielding statistics for Major League Baseball from 1871 through 2015.  It includes data from the two current leagues (American and National), the four other "major" leagues (American Association, Union Association, Players League, and Federal League), and the National Association of 1871-1875. For more details, see [readme2014.txt](http://seanlahman.com/files/database/readme2014.txt)
+
+### Potential Response Variables
+
+- `Rank`           Position in final standings
+- `WSWin`          World Series Winner (Y or N)
+- `LgWin`          League Champion(Y or N)
+
+### Selected Predictor Variables
+
+- `yearID`         Year
+- `W`              Wins
+- `L`              Losses
+- `salary`         Total Salary of the team
+- `totalSalary`    Total Salary of all teams in that year
+- `pctSalary`      Total Salary of the team as a proportion of the total salary of all teams in that year
+
+## Analysis Ideas
+
+Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Wins, Losses, etc.  The project will explore the effectiveness of different models (linear, polynomial, additive, and interaction).
+
+## Sample Data
+
+The following `R` code loads the `Teams.csv` and `Salaries.csv`. Some data manipulation is performed to compute the total salary and the percent of total salary.
+
+```{r}
+suppressMessages(library(leaps))
+suppressMessages(library(lmtest))
+library(MASS)
+
+teams <- read.csv("c:/users/aaron/dropbox/UIUC MCS-DS/STAT420/stat420_proj/Teams.csv")
+salaries <- read.csv("c:/users/aaron/dropbox/UIUC MCS-DS/STAT420/stat420_proj/Salaries.csv")
+salries_by_team_year = aggregate(x=salaries$salary, by = list(salaries$teamID, salaries$yearID), FUN=sum)
+colnames(salries_by_team_year) = c("teamID", "yearID", "salary")
+
+mlb_data = merge(teams, salries_by_team_year, by=c("yearID", "teamID") )
+mlb_data$salary = as.numeric(mlb_data$salary)
+
+total_salary_by_year = aggregate(mlb_data$salary, by = list(mlb_data$yearID), FUN=sum)
+colnames(total_salary_by_year) = c("yearID", "totalSalary")
+
+mlb_data = merge(mlb_data, total_salary_by_year, by = c("yearID"))
+mlb_data$pctSalary = mlb_data$salary / mlb_data$totalSalary
+
+mlb_data = mlb_data[mlb_data$yearID>2000,]
+
+mlb_data$Formula1 = mlb_data$R^2/(mlb_data$R^2+mlb_data$RA^2)
+mlb_data$WinPct = mlb_data$W/mlb_data$G
+
+# plot(sqrt(WinPct)~attendance,data = mlb_data)
+
+fit = lm(sqrt(WinPct)~Formula1*SV*X2B*RA*attendance, data = mlb_data)
+# summary(fit)
+p = length(coef(fit))
+n = length(resid(fit))
+  
+backBIC = step(fit, direction = 'backward', trace = 0,k=log(n))
+# summary(backBIC)
+
+all_mod = summary(regsubsets(sqrt(WinPct)~Formula1*SV*X2B*RA*attendance, nvmax=p, data = mlb_data, really.big = T))
+
+p = length(coef(fit))
+n = length(resid(fit))
+
+# all_mod = summary(regsubsets(WinPct~Formula1*X2B*SV*yearID, nvmax=p, data = mlb_data, really.big = T))
+
+all_mod_aic = n * log(all_mod$rss / n) + 2 * (2:p)
+best_aic_ind = which.min(all_mod_aic)
+vars = all_mod$which[best_aic_ind,]
+best_vars = names(vars[vars=="TRUE"])
+var.form = paste(best_vars[-1], collapse = "+")
+mod.form = as.formula(paste("sqrt(WinPct)", var.form, sep = "~"))
+all_mod_best_aic = lm(mod.form, data = mlb_data)
+
+all_mod_bic = n * log(all_mod$rss / n) + log(n) * (2:p)
+best_bic_ind = which.min(all_mod_bic)
+vars = all_mod$which[best_bic_ind,]
+best_vars = names(vars[vars=="TRUE"])
+var.form = paste(best_vars[-1], collapse = "+")
+mod.form = as.formula(paste("sqrt(WinPct)", var.form, sep = "~"))
+all_mod_best_bic = lm(mod.form, data = mlb_data)
+
+best_adjr2 = which.max(all_mod$adjr2)
+vars = all_mod$which[best_adjr2,]
+best_vars = names(vars[vars=="TRUE"])
+var.form = paste(best_vars[-1], collapse = "+")
+mod.form = as.formula(paste("sqrt(WinPct)", var.form, sep = "~"))
+all_mod_best_adjr2 = lm(mod.form, data = mlb_data)
+
+calc_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+
+calc_loocv_rmse(backBIC)
+calc_loocv_rmse(all_mod_best_aic)
+calc_loocv_rmse(all_mod_best_bic)
+calc_loocv_rmse(all_mod_best_adjr2)
+
+summary(all_mod_best_adjr2)
+
+afit = all_mod_best_adjr2
+plot(afit, which = 1)
+bptest(afit)
+
+plot(afit, which = 2)
+shapiro.test(resid(afit))
+
+cd_fit = cooks.distance(afit)
+large_cd = cd_fit > 4 / length(afit)
+cd_fit[large_cd]
+
+```
