@@ -7,7 +7,7 @@ output:
     toc: yes
 ---
 
-# Analysis Proposal
+# Introduction
 
 ## Project Members
 
@@ -88,17 +88,11 @@ mlb_data$runDifferiential = mlb_data$R^2 / (mlb_data$R^2 + mlb_data$RA^2)
 ```
 
 
-### Only use from Modern Era
-```{r}
-mlb_data = mlb_data[mlb_data$yearID>2000,]
-head(mlb_data)
-```
-
 ### Identify predictors that have potential prediction values in the dataset
 
 #### Remove variables that are descriptive
 ```{r}
-mlb_lm_data = mlb_data[, setdiff(colnames(mlb_data), c("yearID", "teamID", "lgID", "franchID", "divID", "teamIDBR", "teamIDlahman45", "teamIDretro", "park", "name"))]
+mlb_lm_data = mlb_data[, setdiff(colnames(mlb_data), c("teamID", "lgID", "franchID", "divID", "teamIDBR", "teamIDlahman45", "teamIDretro", "park", "name"))]
 head(mlb_lm_data)
 
 ```
@@ -130,24 +124,77 @@ mlb_lm_data = mlb_lm_data[, setdiff(colnames(mlb_lm_data), c("R", "RA"))]
 head(mlb_lm_data)
 ```
 
+
+### Only use from Modern Era
+```{r}
+mlb_lm_year_filtered_data = mlb_lm_data[mlb_lm_data$yearID>2000,]
+mlb_lm_year_filtered_data = mlb_lm_year_filtered_data[, setdiff(colnames(mlb_lm_year_filtered_data), c("yearID"))]
+head(mlb_lm_year_filtered_data)
+```
+
+
 ### Use Vif to investigate the correlation of variables
 ```{r}
 library(faraway)
-vif(mlb_lm_data)
+vif(mlb_lm_year_filtered_data)
 ```
 
 There are a number of variables with high VIF.  Therefore, we expect the model selection process will eliminate a large number of those variables.
 
-## Use Forward BIC to find a "good" model
 ```{r}
-mlb_lm = lm(WinPct ~ . ^ 2, data=mlb_lm_data)
-n = length(resid(mlb_lm))
-mlb_lm_fore_bic = step(lm(WinPct ~ 1, data=mlb_lm_data), WinPct ~ (AB+H+X2B+X3B+HR+BB+SO+SB+CS+HBP+SF+ER+CG+SHO+SV+IPouts+HA+HRA+BBA+SOA+E+DP+FP+attendance+BPF+PPF+pctSalary+runDifferiential) ^ 2, direction = "forward", k = log(n), trace = 0)
-(mlb_lm_fore_bic_summary = summary(mlb_lm_fore_bic))
+  findBestModel = function(startYear) {
+    mlb_lm_year_filtered_data = mlb_lm_data[mlb_lm_data$yearID>=startYear,]
+    mlb_lm_year_filtered_data = mlb_lm_year_filtered_data[, setdiff(colnames(mlb_lm_year_filtered_data), c("yearID"))]
+    n = nrow(mlb_lm_year_filtered_data)
+    mlb_lm_both_bic = step(lm(WinPct ~ 1, data=mlb_lm_year_filtered_data), WinPct ~    (AB+H+X2B+X3B+HR+BB+SO+SB+CS+HBP+SF+ER+CG+SHO+SV+IPouts+HA+HRA+BBA+SOA+E+DP+FP+attendance+BPF+PPF+pctSalary+runDifferiential) ^ 2, direction = "both", k = log(n), trace = 0) 
+    mlb_lm_both_bic
+  }
+```
 
+## Use Stepwise BIC to find a "good" model for year 2001 to 2015
+```{r}
+mlb_lm_both_bic = findBestModel(2001)
+(mlb_lm_both_bic_summary = summary(mlb_lm_both_bic))
 ```
 
 The Model selection process using forward BIC selected a relative small model.  As expected, the `runDifferiential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferiential` and `pctSalary` have the greatest prediction power.
+
+## Salary Effect on winning percentage over time
+
+The following code select the "best" with end year fixed at 2015, but with start year ranged from 1900 to 2015.
+
+```{r warning=FALSE}
+# runPctSalaryTimeEffectAnalysis
+maxNumYears = 2015 - 1900 + 1
+pctSalaryTimeEffectAnalysis = matrix(rep(0, maxNumYears*2), nrow = maxNumYears)
+colnames(pctSalaryTimeEffectAnalysis) = c("startYear", "hasPctSalary")
+for (numYears in 1:maxNumYears) {
+  startYear=2015-numYears + 1
+  mlb_lm_both_bic = findBestModel(startYear)
+  pctSalaryTimeEffectAnalysis[maxNumYears - numYears + 1, 1] = startYear
+  if ("pctSalary" %in% names(mlb_lm_both_bic$coefficients)) {
+    pctSalaryTimeEffectAnalysis[maxNumYears - numYears + 1, 2] = 1
+  } else {
+    pctSalaryTimeEffectAnalysis[maxNumYears - numYears + 1, 2] = 0
+  }
+}
+pctSalaryTimeEffectAnalysis=as.data.frame(pctSalaryTimeEffectAnalysis)
+```
+
+The following time range (with startYear to 2015) include pctSalary in the "best" model selection:
+```{r}
+pctSalaryTimeEffectAnalysis$startYear[pctSalaryTimeEffectAnalysis$hasPctSalary == 1]
+```
+
+## Main model selected for further analysis
+
+Data from 2001 to 2015
+
+```{r}
+mlb_lm_both_bic = findBestModel(2001)
+mlb_lm_both_bic_summary = summary(mlb_lm_both_bic)
+mlb_lm_both_bic$coefficients
+```
 
 ## Assumption Analysis
 ```{r echo=FALSE}
@@ -160,7 +207,7 @@ plotResidual = function(lmModel, pointcol="dodgerblue", linecol="darkorange") {
        xlab = "Fitted",
        ylab = "Residuals"
        )
-abline(h = 0, col = linecol, lwd = 2)
+  abline(h = 0, col = linecol, lwd = 2)
 }
 
 plotQQ = function(lmModel, pointcol="dodgerblue", linecol="darkorange") {
@@ -172,39 +219,79 @@ calc_loocv_rmse = function(model) {
 }
 ```
 
+
+
+
 ### Constant Variance Assumption
 
 #### Fitted versus Residuals Plot
 ```{r}
-plotResidual(mlb_lm_fore_bic)
-
+plotResidual(mlb_lm_both_bic)
 ```
 
 #### Breusch-Pagan Test
 
 ```{r}
-(bptest_mlb_lm_fore_bic = bptest(mlb_lm_fore_bic))
+(bptest_mlb_lm_both_bic = bptest(mlb_lm_both_bic))
 ```
 
-From the Breusch-Pagan test, the p-val, `r bptest_mlb_lm_fore_bic$p.value` , is relatively large, which means we cannot reject the null hypothesis of Homoscedasticity (constant variance.)  In addition, the residual plots show the spread of residuals are evenly distributed.  There, we conclude that the constant variance is not violated.
+From the Breusch-Pagan test, the p-val, `r bptest_mlb_lm_both_bic$p.value` , is relatively large, which means we cannot reject the null hypothesis of Homoscedasticity (constant variance.)  In addition, the residual plots show the spread of residuals are evenly distributed.  There, we conclude that the constant variance is not violated.
 
 ### Normality Assumption
 
 #### Normal Q-Q Plot
 ```{r}
-plotQQ(mlb_lm_fore_bic)
+plotQQ(mlb_lm_both_bic)
 ```
 
 #### Shapiro-Wilk Test
 
 ```{r}
-(shapiro_mlb_lm_fore_bic = shapiro.test(resid(mlb_lm_fore_bic)))
+(shapiro_mlb_lm_both_bic = shapiro.test(resid(mlb_lm_both_bic)))
 ```
 
-The normality assumption for this model has not been violated.  From the q-q plot, the residuals are more or less on the qqline.  From the Shapiro-Wilk Test, the p value, `r shapiro_mlb_lm_fore_bic$p.value`, is large, hence, we cannot reject the null hypothesis of the data following a normal distribution.
+The normality assumption for this model has not been violated.  From the q-q plot, the residuals are more or less on the qqline.  From the Shapiro-Wilk Test, the p value, `r shapiro_mlb_lm_both_bic$p.value`, is large, hence, we cannot reject the null hypothesis of the data following a normal distribution.
 
 
+## Other Analysis
+
+- Number of Influential observations
+```{r}
+num_data = length(mlb_lm_both_bic$residuals)
+num_influential = sum(cooks.distance(mlb_lm_both_bic) > 4 / length(cooks.distance(mlb_lm_both_bic)))
+num_influential
+```
+
+- The portion of Influential observations is:
+
+```{r}
+num_influential / num_data
+```
+
+- Number of High leverage observations
+```{r}
+num_high_leverage = sum(hatvalues(mlb_lm_both_bic) > 2 * mean(hatvalues(mlb_lm_both_bic)))
+num_high_leverage
+```
+
+- The portion of High leverage observations is:
+```{r}
+num_high_leverage / num_data
+```
 
 
+## ANOVA
 
+The Pythagorean Theorem of Baseball states that the pct win can be predicted by runDifferential.  Let's see whether the simplest model is better than the slightly bigger model chosen by stepwise BIC
+
+```{r}
+    mlb_lm_year_filtered_data = mlb_lm_data[mlb_lm_data$yearID>=2001,]
+    mlb_lm_year_filtered_data = mlb_lm_year_filtered_data[, setdiff(colnames(mlb_lm_year_filtered_data), c("yearID"))]
+    lm_small = lm(WinPct ~ runDifferiential, data=mlb_lm_year_filtered_data)
+    
+    (mlb_lm_anova = anova(lm_small, mlb_lm_both_bic))
+    mlb_lm_anova_p_val = mlb_lm_anova$`Pr(>F)`[2]
+```
+
+With p-val, `r mlb_lm_anova_p_val`, we reject the Null Hypothesis of $\beta_{SV}$=$\beta_{BB}$=$\beta_{CG}$=$\beta_{pctSalary}$=0
 
