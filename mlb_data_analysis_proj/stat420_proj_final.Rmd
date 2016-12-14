@@ -119,10 +119,10 @@ teams = read.csv("Teams.csv")
 salaries = read.csv("Salaries.csv")
 
 # Add pctSalary
-salries_by_team_year = aggregate(x=salaries$salary, by = list(salaries$teamID, salaries$yearID), FUN=sum)
-colnames(salries_by_team_year) = c("teamID", "yearID", "salary")
+salaries_by_team_year = aggregate(x=salaries$salary, by = list(salaries$teamID, salaries$yearID), FUN=sum)
+colnames(salaries_by_team_year) = c("teamID", "yearID", "salary")
 
-mlb_data = merge(teams, salries_by_team_year, by=c("yearID", "teamID") )
+mlb_data = merge(teams, salaries_by_team_year, by=c("yearID", "teamID") )
 mlb_data$salary = as.numeric(mlb_data$salary)
 
 total_salary_by_year = aggregate(mlb_data$salary, by = list(mlb_data$yearID), FUN=sum)
@@ -316,7 +316,7 @@ With p-val, `r mlb_lm_anova_p_val`, we reject the Null Hypothesis of $\beta_{SV}
 
 ## Topic 3: Good model for predicting Win Percentage
 ## Assumption Analysis
-```{r echo=FALSE}
+```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(lmtest)
 
 plotResidual = function(lmModel, pointcol="dodgerblue", linecol="darkorange") {
@@ -415,7 +415,7 @@ The model
 The appendix section should contain code and analysis that are used but that may clutter the report or are not directly related to the choice of model.
 
 ## Compare to larger model with quadratic terms
-```{r}
+```{r,warning=FALSE,message=FALSE}
 n = nrow(mlb_lm_data)
 mlb_lm_fore_start = lm(WinPct ~ 1, data = mlb_lm_data)
 mlb_lm_fore_bic = step(mlb_lm_fore_start, WinPct ~ AB + I(AB^2) + H + I(H^2) + X2B + I(X2B^2) + X3B + I(X3B^2) + HR + I(HR^2) + BB + I(BB^2) + SO + I(SO^2) + SB + I(SB^2) + CS + I(CS^2) + HBP + I(HBP^2) + SF + I(SF^2) + ER + I(ER^2) + CG + I(CG^2) + SHO + I(SHO^2) + SV + I(SV^2) + IPouts + I(IPouts^2) + HA + I(HA^2) + HRA + I(HRA^2) + BBA + I(BBA^2) + SOA + I(SOA^2) + E + I(E^2) + DP + I(DP^2) + FP + I(FP^2) + attendance + I(attendance^2) + BPF + I(BPF^2) + PPF + I(PPF^2) + pctSalary + I(pctSalary^2) + runDifferiential + I(runDifferiential^2), direction = "forward", k = log(n), trace = 0)
