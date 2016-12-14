@@ -235,14 +235,6 @@ mlb_lm_both_bic = findBestModel(2001)
 vif(mlb_lm_both_bic)
 ```
 
-## Write a function to calculate the LOOCV RMSE
-```{r}
-get_loocv_rmse = function(model) {
-  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
-}
-```
-
-
 The Model selection process using forward BIC selected a relatively small model that rids itself of the previously shown high multicollinearity among predictors.  As expected, the `runDifferential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferential` and `pctSalary` have the greatest prediction power.
 
 ## Salary Effect on winning percentage over time
@@ -431,18 +423,27 @@ Find a "good" model with quadratic terms
 ```{r,warning=FALSE,message=FALSE}
 n = nrow(mlb_lm_year_filtered_data)
 mlb_lm_fore_start = lm(WinPct ~ 1, data = mlb_lm_year_filtered_data)
-mlb_lm_fore_bic = step(mlb_lm_fore_start, WinPct ~ AB + I(AB^2) + H + I(H^2) + X2B + I(X2B^2) + X3B + I(X3B^2) + HR + I(HR^2) + BB + I(BB^2) + SO + I(SO^2) + SB + I(SB^2) + CS + I(CS^2) + HBP + I(HBP^2) + SF + I(SF^2) + ER + I(ER^2) + CG + I(CG^2) + SHO + I(SHO^2) + SV + I(SV^2) + IPouts + I(IPouts^2) + HA + I(HA^2) + HRA + I(HRA^2) + BBA + I(BBA^2) + SOA + I(SOA^2) + E + I(E^2) + DP + I(DP^2) + FP + I(FP^2) + attendance + I(attendance^2) + BPF + I(BPF^2) + PPF + I(PPF^2) + pctSalary + I(pctSalary^2) + runDifferential + I(runDifferential^2), direction = "forward", k = log(n), trace = 0)
-(mlb_lm_fore_bic_summary = summary(mlb_lm_fore_bic))
+mlb_quad_fore_bic = step(mlb_lm_fore_start, WinPct ~ AB + I(AB^2) + H + I(H^2) + X2B + I(X2B^2) + X3B + I(X3B^2) + HR + I(HR^2) + BB + I(BB^2) + SO + I(SO^2) + SB + I(SB^2) + CS + I(CS^2) + HBP + I(HBP^2) + SF + I(SF^2) + ER + I(ER^2) + CG + I(CG^2) + SHO + I(SHO^2) + SV + I(SV^2) + IPouts + I(IPouts^2) + HA + I(HA^2) + HRA + I(HRA^2) + BBA + I(BBA^2) + SOA + I(SOA^2) + E + I(E^2) + DP + I(DP^2) + FP + I(FP^2) + attendance + I(attendance^2) + BPF + I(BPF^2) + PPF + I(PPF^2) + pctSalary + I(pctSalary^2) + runDifferential + I(runDifferential^2), direction = "forward", k = log(n), trace = 0)
+(mlb_quad_fore_bic_summary = summary(mlb_quad_fore_bic))
 ```
 
 Recall that the model we chose in the main section is
 ```{r}
 mlb_lm_both_bic
+
+sqrt(mean(resid(mlb_lm_both_bic)^2))
+sqrt(mean(resid(mlb_quad_fore_bic)^2))
 ```
+
+It appears the quadratic model has resulted in a slightly lower RMSE. We could then use the leave-one-out cross-validated RMSE to test if the quadratic model is only better due to overfitting of the data.
 
 Loocv RMSE Of the Quadratic Model
 ```{r}
-(quad_loocv_rmse = get_loocv_rmse(mlb_lm_fore_bic))
+get_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+
+(quad_loocv_rmse = get_loocv_rmse(mlb_quad_fore_bic))
 ```
 
 Loocv RMSE Of main section Model
@@ -450,22 +451,39 @@ Loocv RMSE Of main section Model
 (main_loocv_rmse = get_loocv_rmse(mlb_lm_both_bic))
 ```
 
-Note that the LOOCV RMSE of the Quadratic Model is `r quad_loocv_rmse`, which is less than the main section model one, `r main_loocv_rmse`.  This means that the Quadratic Model is better in predicting win percentage.  However, in viewing the plots of the quadratic terms below, we see several influential observations that appear to be the cause of a somewhat false quadratic relationship for the variables `BB`, `H`, and `attendance`. We therefore decided to keep the main model as it is simpler and more consistent with conventional wisdom.
+Note that the LOOCV RMSE of the Quadratic Model is `r quad_loocv_rmse`, which is less than the main section model, `r main_loocv_rmse`.  This helps to support the notion that the Quadratic Model is better at predicting win percentage.  However, in viewing the plots of the quadratic terms below, we see several influential observations that appear to be the cause of a somewhat false quadratic relationship for the variables `BB`, `H`, `attendance`, and `IPouts`. We therefore decided to keep the main model, as it is simpler and easier to explain.
 
 ```{r }
-library(ggplot2)
-ggplot(data = mlb_lm_year_filtered_data, aes(x = mlb_lm_year_filtered_data$BB, y = mlb_lm_year_filtered_data$WinPct)) +
-  stat_smooth(method = "lm", se = FALSE, color = "green", formula = y ~ x) +
-  stat_smooth(method = "lm", se = FALSE, color = "blue", formula = y ~ x + I(x ^ 2)) +
-  geom_point(colour = "black", size = 3)
-ggplot(data = mlb_lm_year_filtered_data, aes(x = mlb_lm_year_filtered_data$attendance, y = mlb_lm_year_filtered_data$WinPct)) +
-  stat_smooth(method = "lm", se = FALSE, color = "green", formula = y ~ x) +
-  stat_smooth(method = "lm", se = FALSE, color = "blue", formula = y ~ x + I(x ^ 2)) +
-  geom_point(colour = "black", size = 3)
-ggplot(data = mlb_lm_year_filtered_data, aes(x = mlb_lm_year_filtered_data$H, y = mlb_lm_year_filtered_data$WinPct)) +
-  stat_smooth(method = "lm", se = FALSE, color = "green", formula = y ~ x) +
-  stat_smooth(method = "lm", se = FALSE, color = "blue", formula = y ~ x + I(x ^ 2)) +
-  geom_point(colour = "black", size = 3)
+d=mlb_lm_year_filtered_data
+par(mfrow=c(2,2))
+plot(WinPct ~ BB, data = d, cex = 1.5, pch = 20)
+lines(d$BB, 
+      predict(lm(WinPct~BB, data=d), 
+      newdata = d),col = "dodgerblue", lwd = 2, lty = 1)
+lines(sort(d$BB), 
+      predict(lm(WinPct~BB+I(BB^2), data=d), 
+      newdata = d[order(d$BB),]),col = "darkorange", lwd = 3, lty = 2)
+plot(WinPct ~ attendance, data = d, cex = 1.5, pch = 20)
+lines(d$attendance, 
+      predict(lm(WinPct~attendance, data=d), 
+      newdata = d),col = "dodgerblue", lwd = 2, lty = 1)
+lines(sort(d$attendance), 
+      predict(lm(WinPct~attendance+I(attendance^2), data=d), 
+      newdata = d[order(d$attendance),]),col = "darkorange", lwd = 3, lty = 2)
+plot(WinPct ~ H, data = d, cex = 1.5, pch = 20)
+lines(d$H, 
+      predict(lm(WinPct~H, data=d), 
+      newdata = d),col = "dodgerblue", lwd = 2, lty = 1)
+lines(sort(d$H), 
+      predict(lm(WinPct~H+I(H^2), data=d), 
+      newdata = d[order(d$H),]),col = "darkorange", lwd = 3, lty = 2)
+plot(WinPct ~ IPouts, data = d, cex = 1.5, pch = 20)
+lines(d$IPouts, 
+      predict(lm(WinPct~IPouts, data=d), 
+      newdata = d),col = "dodgerblue", lwd = 2, lty = 1)
+lines(sort(d$IPouts), 
+      predict(lm(WinPct~IPouts+I(IPouts^2), data=d[order(d$IPouts),]), 
+      newdata = d[order(d$IPouts),]),col = "darkorange", lwd = 3, lty = 2)
 ```
 
 ## Checking Results of Final Model After Removing Influential Data Points
