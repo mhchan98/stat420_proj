@@ -181,9 +181,41 @@ There are a number of variables with high VIF.  Therefore, we expect the model s
 
 Now that the data have been prepared, use a simple linear regression to see if `pctSalary` is a useful predictor of `WinPct` for the entire dataset. 
 
+\[
+Model_{slrpctSalary}: Y_{WinPct} = \beta_{0} + \beta_{pctSalary} X_{pctSalary} + \epsilon
+\]
 ```{r}
 pctSalary_model = lm(WinPct ~ pctSalary, data = mlb_lm_data)
 ```
+
+
+```{r}
+yearGroup = ceiling((mlb_lm_data$yearID - 1984)  / 10)
+yearGroupSummary = aggregate(mlb_lm_data$yearID, by=list(yearGroup), FUN="range")
+plot(WinPct ~ pctSalary, data = mlb_lm_data,
+     xlab = "Team Salary Percentage",
+     ylab = "Win Percentage",
+     main = "Win Percentage vs Salary Percentage",
+     pch  = 20,
+     cex  = 1,
+     col  = yearGroup)
+
+legend(
+  x = 0.07,
+  y = 0.45,
+  legend= c(
+    "1985 to 1994",
+    "1995 to 2004",
+    "2005 to 2014",
+    "2015"
+    ),
+  col = yearGroupSummary$Group.1,
+  lty = 1,
+  pch  = 20
+)
+abline(pctSalary_model, lwd = 3, col = "darkorange")
+```
+
 
 Record **$R^2$** values for each individual year of salary data (1985 - 2015). 
 
@@ -204,6 +236,8 @@ for (i in startYear:endYear) {
 }
 pctSalary_TimeAnalysis=as.data.frame(pctSalary_TimeAnalysis)
 ```
+
+
 
 ## Topic 2: Evaluate the Pythagorean Theorem of Baseball
 
