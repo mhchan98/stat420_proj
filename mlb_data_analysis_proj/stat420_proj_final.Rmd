@@ -435,7 +435,6 @@ mlb_lm_both_bic
 Loocv RMSE Of the Quadratic Model
 ```{r}
 (quad_loocv_rmse = get_loocv_rmse(mlb_lm_fore_bic))
-anova(mlb_lm_both_bic, mlb_lm_fore_bic)
 ```
 
 Loocv RMSE Of main section Model
