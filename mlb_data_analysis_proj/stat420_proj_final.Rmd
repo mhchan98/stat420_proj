@@ -282,8 +282,6 @@ mlb_lm_both_bic$coefficients
 
 # Results
 
-The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task, and provide evidence that your final choice of model is a good one.
-
 ## Topic 1: The Money Effect
 
 ```{r}
@@ -415,8 +413,6 @@ It would be interesting for futher analysis to see how individual player statist
 The model 
 
 # Appendix
-
-The appendix section should contain code and analysis that are used but that may clutter the report or are not directly related to the choice of model.
 
 ## Compare to larger model with quadratic terms
 ```{r,warning=FALSE,message=FALSE}
