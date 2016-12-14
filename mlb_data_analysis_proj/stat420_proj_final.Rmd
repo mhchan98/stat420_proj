@@ -1,13 +1,21 @@
 ---
-title: 'STAT 420: Data Analysis Project, Fall 2016'
+title: 'Does Money Make A Winner?  A Statistical Approach To Predicting Major League Baseball Team Success'
 author: "Aaron Ray (aaronwr2), Aaron Rogers (aaronrr2), Michael Chan (mhchan3), Michael Johnson (mjohns44)"
-date: 'Monday, November 14, 2016'
+date: 'December 14, 2016'
 output:
   html_document:
     toc: yes
 ---
 
+This study is presented in fulfillment of the final project requirements for STAT420: Data Analysis, Fall 2016 semester, University of Illinois at Urbana-Champaign.  Professor David Dalpiaz.
+
+
 # Introduction
+
+The introduction section should relay what you are attempting to accomplish. It should provide enough background to your work such that a reader would not need to load your data to understand your report. Like the simulation project, you can assume the reader is familiar with the course concepts, but not your data. Some things to consider:
+
+    What is this data? Where did it come from? What are the variables? Why is it interesting to you?
+    Why are you creating a model for this data? What is the goal of this model?
 
 ## Project Members
 
@@ -16,42 +24,74 @@ output:
 - Michael Chan (mhchan3)
 - Michael Johnson (mjohns44)
 
-## Proposed title for the project
 
-**A Statistical Approach to Predicting Major League Baseball Team Success**
+## Project Description and Goals
 
-## Project Description
+Major League Baseball is the first introduction many people in the United States have to the field of statistics.  Children and adults alike recite batting averages for their favorite players, measure pitchers by their earned run average, and expect great seasons from teams loaded with high-salary players.  Everyday people have spirited debates about baseball statistics, arguing for their own theories of which statistics predict victory on the baseball field. 
 
-Major League Baseball was the first introduction many people in the United States had to the field of statistics.  To this day, children and adults alike recite batting averages for their favorite players, measure pitchers by their earned run average, and talk about how much money specific players earn.  Everyday people have spirited debates about baseball statistics, arguing for their own theories of which statistics predict victory on the baseball field. 
+One measure that seemingly towers over all others is a team's payroll.  With the evolution of [free agency](https://en.wikipedia.org/wiki/History_of_baseball_in_the_United_States#Player_wealth_and_influence), teams compete with each other to attract the best players.  Conventional wisdom holds that the more money a team spends on player salaries, the better players it can attract, and the more games it can win.  However, recent articles from [Sports Illustrated](http://www.si.com/mlb/strike-zone/2013/10/07/mlb-playoff-teams-payroll-rays-athletics-indians-pirates) and others make the case that low-payroll teams can compete effectively with their high-payroll rivals.    
 
-This project will parse over 140 years of data to find which combinations of baseball statistics have been the most accurate in predicting the championship team.
+Is team payroll correlated to team success?  The goal of this project is to evaluate the effect of team salaries on winning percentage.  We also developed models using other available team-level data to find a good model for explaining and predicting team winning percentages.
 
 ## Description of Dataset
 
-The source of the data for this project: http://www.seanlahman.com/baseball-archive/statistics/
+The source of the data for this project is http://www.seanlahman.com/baseball-archive/statistics/
 
 This dataset contains pitching, hitting, and fielding statistics for Major League Baseball from 1871 through 2015.  It includes data from the two current leagues (American and National), the four other "major" leagues (American Association, Union Association, Players League, and Federal League), and the National Association of 1871-1875. For more details, see [readme2014.txt](http://seanlahman.com/files/database/readme2014.txt)
 
-### Potential Response Variables
+This collection of data includes 24 tables.  For our purposes, we focused on the effect of **team salary** on regular season **winning percentage**.  We limited our dataset to two files: Teams and Salaries.  
 
-- `Rank`           Position in final standings
-- `WSWin`          World Series Winner (Y or N)
-- `LgWin`          League Champion(Y or N)
+### Teams table
 
-### Selected Predictor Variables
+The Teams table has 48 variables, of which 32 are used for this study:
 
-- `yearID`         Year
-- `W`              Wins
-- `L`              Losses
-- `salary`         Total Salary of the team
-- `totalSalary`    Total Salary of all teams in that year
-- `pctSalary`      Total Salary of the team as a proportion of the total salary of all teams in that year
+yearID         Year
+G              Games played
+W              Wins
+R              Runs scored
+AB             At bats
+H              Hits by batters
+2B             Doubles
+3B             Triples
+HR             Homeruns by batters
+BB             Walks by batters
+SO             Strikeouts by batters
+SB             Stolen bases
+CS             Caught stealing
+HBP            Batters hit by pitch
+SF             Sacrifice flies
+RA             Opponents runs scored
+ER             Earned runs allowed
+ERA            Earned run average
+CG             Complete games
+SHO            Shutouts
+SV             Saves
+IPOuts         Outs Pitched (innings pitched x 3)
+HA             Hits allowed
+HRA            Homeruns allowed
+BBA            Walks allowed
+SOA            Strikeouts by pitchers
+E              Errors
+DP             Double Plays
+FP             Fielding  percentage
+attendance     Home attendance total
+BPF            Three-year park factor for batters (>100 means batter-friendly home ballpark)
+PPF            Three-year park factor for pitchers (>100 means pitcher-friendly home ballpark)
 
-## Analysis Ideas
+The Salaries table has data for all ballplayers from 1985-2015.  We joined this table to the Teams table to following fields are used in this study:
 
-Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Wins, Losses, etc.  The project will explore the effectiveness of different models (linear, polynomial, additive, and interaction).
+salary         Annual salary (one row per player)
 
-## Sample Data
+
+Moreover, we will use these fields to calculate the following variables:
+
+totalSalary    Team payroll (sum of salary for all players on a team)
+pctSalary      Team payroll / All payrolls
+WinPct         Wins / Games
+
+# Method
+
+## Calculated Variables
 
 The following `R` code loads the `Teams.csv` and `Salaries.csv`. Some data manipulation is performed to compute the total salary and the percent of total salary.
 
@@ -77,6 +117,22 @@ mlb_data$WinPct = mlb_data$W/mlb_data$G
 
 ```
 
+The methods section should contain the bulk of your "work." This section will contain the bulk of the R code that is used to generate the results. Your R code is not expected to be perfect idiomatic R, but it is expected to be understood by a reader without too much effort. Use RMarkdown and code comments to your advantage to explain your code if needed.
+
+This section should contain any information about data preparation that is performed to the original data before modelling. Then you will apply methods seen in class, which may include some of the following but are not limited to:
+
+    Multiple Linear Regression
+    ANOVA
+    Dummy Variables
+    Interaction
+    Residual Diagnostics
+    Outlier Diagnostics
+    Transformations
+    Polynomial Regression
+    Model Selection
+
+Your task is not to use as many methods as possible. Your task is to use appropriate methods to find a good model that can correctly answer a question about the dataset.
+
 ### Add run differential. 
 
 One of the hypothesis we want to test is whether the Pythagorean Theorem of Baseball holds.  The Pythagoream Theorem suggests the run differenial is a good predictor of win percentage
@@ -97,7 +153,7 @@ head(mlb_lm_data)
 
 ```
 
-#### Remove variables that are essentially other repsonses
+#### Remove variables that are essentially other responses
 ```{r}
 mlb_lm_data = mlb_lm_data[, setdiff(colnames(mlb_lm_data), c("L", "Rank", "DivWin", "WCWin", "LgWin", "WSWin"))]
 head(mlb_lm_data)
@@ -142,9 +198,10 @@ vif(mlb_lm_year_filtered_data)
 There are a number of variables with high VIF.  Therefore, we expect the model selection process will eliminate a large number of those variables.
 
 ```{r}
-  findBestModel = function(startYear) {
+findBestModel = function(startYear) {
     mlb_lm_year_filtered_data = mlb_lm_data[mlb_lm_data$yearID>=startYear,]
-    mlb_lm_year_filtered_data = mlb_lm_year_filtered_data[, setdiff(colnames(mlb_lm_year_filtered_data), c("yearID"))]
+    mlb_lm_year_filtered_data = mlb_lm_year_filtered_data[,
+      setdiff(colnames(mlb_lm_year_filtered_data), c("yearID"))]
     n = nrow(mlb_lm_year_filtered_data)
     mlb_lm_both_bic = step(lm(WinPct ~ 1, data=mlb_lm_year_filtered_data), WinPct ~    (AB+H+X2B+X3B+HR+BB+SO+SB+CS+HBP+SF+ER+CG+SHO+SV+IPouts+HA+HRA+BBA+SOA+E+DP+FP+attendance+BPF+PPF+pctSalary+runDifferiential) ^ 2, direction = "both", k = log(n), trace = 0) 
     mlb_lm_both_bic
@@ -157,11 +214,19 @@ mlb_lm_both_bic = findBestModel(2001)
 (mlb_lm_both_bic_summary = summary(mlb_lm_both_bic))
 ```
 
+## Write a function to calculate the LOOCV RMSE
+```{r}
+get_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+```
+
+
 The Model selection process using forward BIC selected a relative small model.  As expected, the `runDifferiential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferiential` and `pctSalary` have the greatest prediction power.
 
 ## Salary Effect on winning percentage over time
 
-The following code select the "best" with end year fixed at 2015, but with start year ranged from 1900 to 2015.
+The following code select the "best" with end year fixed at 2015, but with start year ranged from 1985 to 2015.
 
 ```{r warning=FALSE}
 # runPctSalaryTimeEffectAnalysis
@@ -195,6 +260,22 @@ mlb_lm_both_bic = findBestModel(2001)
 mlb_lm_both_bic_summary = summary(mlb_lm_both_bic)
 mlb_lm_both_bic$coefficients
 ```
+
+# Results
+
+The results section should contain numerical or graphical summaries of your results. You should report a final model you have chosen. There is not necessarily one, singular correct model, but certainly some methods and models are better than others in certain situations. You may use any methods we studied this semester to complete this task, and provide evidence that your final choice of model is a good one.
+
+## Compare to larger model with quadratic terms
+```{r}
+n = length(resid(mlb_lm_data))
+mlb_lm_fore_start = lm(WinPct ~ 1, data = mlb_lm_data)
+mlb_lm_fore_bic = step(mlb_lm_fore_start, WinPct ~ AB + I(AB^2) + H + I(H^2) + X2B + I(X2B^2) + X3B + I(X3B^2) + HR + I(HR^2) + BB + I(BB^2) + SO + I(SO^2) + SB + I(SB^2) + CS + I(CS^2) + HBP + I(HBP^2) + SF + I(SF^2) + ER + I(ER^2) + CG + I(CG^2) + SHO + I(SHO^2) + SV + I(SV^2) + IPouts + I(IPouts^2) + HA + I(HA^2) + HRA + I(HRA^2) + BBA + I(BBA^2) + SOA + I(SOA^2) + E + I(E^2) + DP + I(DP^2) + FP + I(FP^2) + attendance + I(attendance^2) + BPF + I(BPF^2) + PPF + I(PPF^2) + pctSalary + I(pctSalary^2) + runDifferiential + I(runDifferiential^2), direction = "forward", k = log(n), trace = 0)
+(mlb_lm_fore_bic_summary = summary(mlb_lm_fore_bic))
+
+mlb_lm_fore_bic = lm(formula = WinPct ~ runDifferiential + SV + I(BB^2) + CG + I(attendance^2), data = mlb_lm_year_filtered_data)
+anova(mlb_lm_both_bic, mlb_lm_fore_bic)
+```
+
 
 ## Assumption Analysis
 ```{r echo=FALSE}
@@ -294,4 +375,25 @@ The Pythagorean Theorem of Baseball states that the pct win can be predicted by 
 ```
 
 With p-val, `r mlb_lm_anova_p_val`, we reject the Null Hypothesis of $\beta_{SV}$=$\beta_{BB}$=$\beta_{CG}$=$\beta_{pctSalary}$=0
+
+#### Compare models
+
+```{r}
+bigger_model = lm(WinPct ~ runDifferiential + SV + I(BB^2) + BB + CG + I(attendance^2) + pctSalary, data = mlb_lm_year_filtered_data)
+anova(mlb_lm_both_bic, bigger_model)
+anova(mlb_lm_fore_bic, bigger_model)
+```
+
+
+
+
+# Discussion
+
+## Discussion 1
+
+The discussion section should contain discussion of your results. You should frame your results in the context of the data. How is your final model useful?
+
+# Appendix
+
+The appendix section should contain code and analysis that are used but that may clutter the report or are not directly related to the choice of model.
 
