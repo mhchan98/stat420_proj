@@ -169,7 +169,7 @@ Remove variables that are relatively the same across all teams
 mlb_lm_data = mlb_lm_data[, setdiff(colnames(mlb_lm_data), c("G", "Ghome"))]
 ```
 
-### Use Vif to investigate the correlation of variables
+### Use VIF to investigate the correlation of variables
 ```{r}
 library(faraway)
 vif(mlb_lm_data)
@@ -237,8 +237,6 @@ for (i in startYear:endYear) {
 pctSalary_TimeAnalysis=as.data.frame(pctSalary_TimeAnalysis)
 ```
 
-
-
 ## Topic 2: Evaluate the Pythagorean Theorem of Baseball
 
 Use a simple linear regression to see if `runDifferential` is a useful predictor of `WinPct` for the entire dataset. Also fit a model for a simpler variable, `runRatio`, which is just Runs Scored $\div$ Runs Allowed.
@@ -261,7 +259,7 @@ findBestModel = function(startYear) {
   }
 ```
 
-## Use Stepwise BIC to find a "good" model for year 2001 to 2015
+### Use Stepwise BIC to find a "good" model for year 2001 to 2015
 ```{r}
 mlb_lm_both_bic = findBestModel(2001)
 (mlb_lm_both_bic_summary = summary(mlb_lm_both_bic))
@@ -271,7 +269,7 @@ vif(mlb_lm_both_bic)
 
 The Model selection process using forward BIC selected a relatively small model that rids itself of the previously shown high multicollinearity among predictors.  As expected, the `runDifferential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferential` and `pctSalary` have the greatest prediction power.
 
-## Salary Effect on winning percentage over time
+### Salary Effect on winning percentage over time
 
 The following code selects a model with the lowest BIC with end year fixed at 2015, but with start year ranging from 1985 to 2015.
 
@@ -298,7 +296,7 @@ The following time range (with startYear to 2015) include pctSalary in the "best
 pctSalaryTimeEffectAnalysis$startYear[pctSalaryTimeEffectAnalysis$hasPctSalary == 1]
 ```
 
-## Main model selected for further analysis
+### Main model selected for further analysis
 
 Data from 2001 to 2015
 
@@ -310,7 +308,7 @@ mlb_lm_both_bic$coefficients
 
 # Results
 
-## Topic 1: The Money Effect
+## Topic 1: The Money Effect  
 
 ```{r}
 summary(pctSalary_model)
@@ -321,7 +319,8 @@ The p-value shows there is a significant relationship between `pctSalary` and `W
 When fitting a model to the 31 years with salary data available, the $R^2$ varies widely.
 
 ```{r}
-plot(R_sq ~ Year, data = pctSalary_TimeAnalysis, xlab = "Year", ylab = "R-Squared", main = "R-Squared values for SLR of Win Percentage and Team Payroll Percentage", pch  = 1, cex  = 1, col  = "orange")
+plot(R_sq ~ Year, data = pctSalary_TimeAnalysis, xlab = "Year", ylab = "R-Squared", main = "R-Squared values for SLR of Win % and Team Payroll %", pch  = 20, cex  = 2, col  = "blue")
+abline(h = 0.128, lwd = 2, col = "red")
 ```
 
 
@@ -347,7 +346,7 @@ Judging by the plot above, there is an obviously strong relationship between `ru
 With p-val, `r mlb_lm_anova_p_val`, we reject the Null Hypothesis of $\beta_{SV}$=$\beta_{BB}$=$\beta_{CG}$=$\beta_{pctSalary}$=0
 
 ## Topic 3: Good model for predicting Win Percentage
-## Assumption Analysis
+### Assumption Analysis
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(lmtest)
 
@@ -371,14 +370,14 @@ plotQQ = function(lmModel, pointcol="dodgerblue", linecol="darkorange") {
 
 
 
-### Constant Variance Assumption
+#### Constant Variance Assumption
 
-#### Fitted versus Residuals Plot
+**Fitted versus Residuals Plot**
 ```{r}
 plotResidual(mlb_lm_both_bic)
 ```
 
-#### Breusch-Pagan Test
+**Breusch-Pagan Test**
 
 ```{r}
 (bptest_mlb_lm_both_bic = bptest(mlb_lm_both_bic))
@@ -386,14 +385,14 @@ plotResidual(mlb_lm_both_bic)
 
 From the Breusch-Pagan test, the p-val, `r bptest_mlb_lm_both_bic$p.value` , is relatively large, which means we cannot reject the null hypothesis of Homoscedasticity (constant variance.)  In addition, the residual plots show the spread of residuals are evenly distributed.  There, we conclude that the constant variance is not violated.
 
-### Normality Assumption
+#### Normality Assumption
 
-#### Normal Q-Q Plot
+**Normal Q-Q Plot**
 ```{r}
 plotQQ(mlb_lm_both_bic)
 ```
 
-#### Shapiro-Wilk Test
+**Shapiro-Wilk Test**
 
 ```{r}
 (shapiro_mlb_lm_both_bic = shapiro.test(resid(mlb_lm_both_bic)))
@@ -402,7 +401,7 @@ plotQQ(mlb_lm_both_bic)
 The normality assumption for this model has not been violated.  From the q-q plot, the residuals are more or less on the qqline.  From the Shapiro-Wilk Test, the p value, `r shapiro_mlb_lm_both_bic$p.value`, is large, hence, we cannot reject the null hypothesis of the data following a normal distribution.
 
 
-## Other Analysis
+### Other Analysis
 
 - Number of Influential observations
 ```{r}
