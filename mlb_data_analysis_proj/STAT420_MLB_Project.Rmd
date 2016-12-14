@@ -1,0 +1,165 @@
+---
+title: "STAT420 Final Project"
+author: "Michael Johnson"
+date: "12/7/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning= FALSE,message=FALSE,echo=FALSE}
+# Importing necessary modules
+library(lmtest)
+library(MASS)
+library(faraway)
+
+# Defining assumption-testing functions
+fvrplot = function(model,pointcol="dodgerblue",linecol = "darkorange",title = ""){
+  
+  plot(fitted(model),resid(model),col = pointcol,xlab = "Fitted",ylab="Residuals",main=title)
+  abline(h=0, col = linecol, lwd = 3)
+  
+}
+
+nqqplot = function(model,pointcol="dodgerblue",linecol="darkorange",title="Normal Q-Q Plot") {
+  
+  qqnorm(resid(model), main = title, col = pointcol)
+  qqline(resid(model), col = linecol, lwd = 2)
+  
+}
+
+find_rmse = function(y, y_hat) {
+  n = length(y)
+  RMSE = sqrt((1/n) * sum((y - y_hat) ** 2))
+
+}
+
+calc_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+
+pp = function(model1, model2){
+   plot(resid(model1) ~ resid(model2), col= "dodgerblue", pch = 20,
+     xlab = "Residuals, Added Predictor", ylab = "Residuals, Original Model")
+   abline(h = 0, lty = 2)
+   abline(v = 0, lty = 2)
+   abline(lm(resid(model1) ~ resid(model2)),
+       col = "darkorange", lwd = 2)}
+```
+
+```{r,echo=FALSE,warning=FALSE,message=FALSE}
+#install.packages('Lahman',repos="http://cran.rstudio.com/")
+
+teams_data = Lahman::Teams
+salary_data = Lahman::Salaries
+
+#mlb_data = merge(teams_data,salary_data,by = 'teamID',all.x=TRUE)
+
+salaries_by_team_year = aggregate(x=salary_data$salary, by = list(salary_data$teamID, salary_data$yearID), FUN=sum)
+colnames(salaries_by_team_year) = c("teamID", "yearID", "salary")
+
+mlb_data = merge(teams_data, salaries_by_team_year, by=c("yearID", "teamID") )
+mlb_data$salary = as.numeric(mlb_data$salary)
+#str(mlb_data)
+#nrow(mlb_data)
+#nrow(mlb_data[complete.cases(mlb_data),])
+```
+
+# MLB data
+```{r}
+mydata = mlb_data[complete.cases(mlb_data),]
+modern_mlb_data = mydata[mydata$yearID > 1899,]
+
+# Removing columns from data
+myvars = names(modern_mlb_data) %in% c("park", "franchID", "teamID","name","teamIDlahman45","teamIDBR","teamIDretro","WSWin","LgWin","DivWin","WCWin","lgID","divID","Rank","L")
+# "G","HBP","SF","Ghome"
+
+newdata = modern_mlb_data[!myvars]
+
+#head(newdata)
+
+mod = lm(W ~ .,data = newdata)
+
+train_index = sample(1:nrow(newdata), nrow(newdata)/2)
+train_data = newdata[c(train_index),]
+test_data = newdata[-c(train_index),]
+```
+
+# Summary of basic model
+```{r}
+summary(mod)
+```
+
+# Small Model
+
+```{r}
+small_mod = lm(W ~ R*AB*SHO*SV, data = newdata)
+n = length(resid(small_mod))
+small_best_mod = step(small_mod, direction = "backward",trace=0, k=log(n))
+summary(small_best_mod)
+(calc_loocv_rmse(small_best_mod))
+((summary(small_best_mod))$adj.r.squared)
+```
+
+# Model selection with BIC
+```{r}
+#BIC
+
+n = length(resid(mod))
+best_mod = step(mod, direction = "backward",trace=0, k=log(n))
+
+summary(best_mod)
+
+fvrplot(best_mod)
+bptest(best_mod)
+nqqplot(best_mod)
+shapiro.test(resid(best_mod))
+
+(calc_loocv_rmse(best_mod))
+((summary(best_mod))$adj.r.squared)
+
+vif(best_mod)
+
+# It appears there is an issue with multicollinearity as many of the predictors have a VIF > 5. Let's look at the variables of interest: AB, H, RA, E, and FP
+
+best_mod_small = lm(W ~ R + X3B + CG + SHO + SV + IPouts + HRA + BBA, data = newdata )
+ab_mod_small = lm(AB ~ R + X3B + CG + SHO + SV + IPouts + HRA + BBA, data = newdata)
+h_mod_small = lm(H ~ R + X3B + CG + SHO + SV + IPouts + HRA + BBA, data = newdata)
+ra_mod_small = lm(RA ~ R + X3B + CG + SHO + SV + IPouts + HRA + BBA, data = newdata)
+e_mod_small = lm(E ~ R + X3B + CG + SHO + SV + IPouts + HRA + BBA, data = newdata)
+fp_mod_small = lm(FP ~ R + X3B + CG + SHO + SV + IPouts + HRA + BBA, data = newdata)
+
+cor(resid(ab_mod_small), resid(best_mod_small))
+pp(best_mod_small,ab_mod_small)
+
+cor(resid(h_mod_small), resid(best_mod_small))
+pp(best_mod_small,h_mod_small)
+
+cor(resid(ra_mod_small), resid(best_mod_small))
+pp(best_mod_small,ra_mod_small)
+
+cor(resid(e_mod_small), resid(best_mod_small))
+pp(best_mod_small,e_mod_small)
+
+cor(resid(fp_mod_small), resid(best_mod_small))
+pp(best_mod_small,fp_mod_small)
+
+#pairs(newdata, col = "dodgerblue")
+#round(cor(newdata), 2)
+
+#mlb_add = cooks.distance(best_mod)
+#n = length(resid(best_mod))
+
+#best_mod_fix = lm(W ~ R + AB + H + X3B + RA + CG + SHO + SV + IPouts + HRA + BBA + E + FP, data = newdata, subset = mlb_add <= 4 / length(mlb_add))
+
+#fvrplot(best_mod_fix)
+#bptest(best_mod_fix)
+#nqqplot(best_mod_fix)
+#shapiro.test(resid(best_mod_fix))
+#summary(best_mod_fix)
+
+#anova(best_mod, best_mod_fix)
+#anova(train_mod_fix_1, best_mod_fix)
+```
