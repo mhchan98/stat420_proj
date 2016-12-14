@@ -231,6 +231,8 @@ findBestModel = function(startYear) {
 ```{r}
 mlb_lm_both_bic = findBestModel(2001)
 (mlb_lm_both_bic_summary = summary(mlb_lm_both_bic))
+
+vif(mlb_lm_both_bic)
 ```
 
 ## Write a function to calculate the LOOCV RMSE
@@ -241,7 +243,7 @@ get_loocv_rmse = function(model) {
 ```
 
 
-The Model selection process using forward BIC selected a relative small model.  As expected, the `runDifferential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferential` and `pctSalary` have the greatest prediction power.
+The Model selection process using forward BIC selected a relatively small model that rids itself of the previously shown high multicollinearity among predictors.  As expected, the `runDifferential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferential` and `pctSalary` have the greatest prediction power.
 
 ## Salary Effect on winning percentage over time
 
