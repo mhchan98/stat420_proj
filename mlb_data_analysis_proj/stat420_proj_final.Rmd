@@ -443,3 +443,12 @@ Loocv RMSE Of main section Model
 ```
 
 Note that the LOOCV RMSE of the Quadratic Model is `r quad_loocv_rmse`, which is less than the main section model one, `r main_loocv_rmse`.  This means that the Quadratic Model is better in predicting win percentage.  However, we kept the main model as it is much simpler.
+
+## Checking Results of Final Model After Removing Influential Data Points
+
+```{r}
+final_model_wo_infl = lm(formula = WinPct ~ runDifferential + SV + BB + CG + pctSalary, data = mlb_lm_year_filtered_data, subset = cooks.distance(mlb_lm_both_bic) <=  4/length(cooks.distance(mlb_lm_both_bic)))
+summary(final_model_wo_infl)$coefficients
+summary(mlb_lm_both_bic)$coefficients
+```
+The coefficients after removing the influential points remain relatively unchanged so our initial model is still sufficient.
