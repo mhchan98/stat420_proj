@@ -141,7 +141,7 @@ mlb_data$WinPct = mlb_data$W / mlb_data$G
 Add Run Differential and Run Ratio
 
 ```{r}
-mlb_data$runDifferiential = mlb_data$R^2 / (mlb_data$R^2 + mlb_data$RA^2)
+mlb_data$runDifferential = mlb_data$R^2 / (mlb_data$R^2 + mlb_data$RA^2)
 mlb_data$runRatio = mlb_data$R / mlb_data$RA
 ```
 
@@ -210,7 +210,7 @@ pctSalary_TimeAnalysis=as.data.frame(pctSalary_TimeAnalysis)
 Use a simple linear regression to see if `runDifferential` is a useful predictor of `WinPct` for the entire dataset. Also fit a model for a simpler variable, `runRatio`, which is just Runs Scored $\div$ Runs Allowed.
 
 ```{r}
-runDifferential_model = lm(WinPct ~ runDifferiential, data = mlb_lm_data)
+runDifferential_model = lm(WinPct ~ runDifferential, data = mlb_lm_data)
 runRatio_model = lm(WinPct ~ runRatio, data = mlb_lm_data)
 ```
 
@@ -222,7 +222,7 @@ findBestModel = function(startYear) {
     mlb_lm_year_filtered_data = mlb_lm_year_filtered_data[,
       setdiff(colnames(mlb_lm_year_filtered_data), c("yearID"))]
     n = nrow(mlb_lm_year_filtered_data)
-    mlb_lm_both_bic = step(lm(WinPct ~ 1, data=mlb_lm_year_filtered_data), WinPct ~    (AB+H+X2B+X3B+HR+BB+SO+SB+CS+HBP+SF+ER+CG+SHO+SV+IPouts+HA+HRA+BBA+SOA+E+DP+FP+attendance+BPF+PPF+pctSalary+runDifferiential) ^ 2, direction = "both", k = log(n), trace = 0) 
+    mlb_lm_both_bic = step(lm(WinPct ~ 1, data=mlb_lm_year_filtered_data), WinPct ~    (AB+H+X2B+X3B+HR+BB+SO+SB+CS+HBP+SF+ER+CG+SHO+SV+IPouts+HA+HRA+BBA+SOA+E+DP+FP+attendance+BPF+PPF+pctSalary+runDifferential) ^ 2, direction = "both", k = log(n), trace = 0) 
     mlb_lm_both_bic
   }
 ```
@@ -241,7 +241,7 @@ get_loocv_rmse = function(model) {
 ```
 
 
-The Model selection process using forward BIC selected a relative small model.  As expected, the `runDifferiential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferiential` and `pctSalary` have the greatest prediction power.
+The Model selection process using forward BIC selected a relative small model.  As expected, the `runDifferential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferential` and `pctSalary` have the greatest prediction power.
 
 ## Salary Effect on winning percentage over time
 
@@ -306,7 +306,7 @@ The Pythagorean Theorem of Baseball states that the pct win can be predicted by 
 ```{r}
     mlb_lm_year_filtered_data = mlb_lm_data[mlb_lm_data$yearID>=2001,]
     mlb_lm_year_filtered_data = mlb_lm_year_filtered_data[, setdiff(colnames(mlb_lm_year_filtered_data), c("yearID"))]
-    lm_small = lm(WinPct ~ runDifferiential, data=mlb_lm_year_filtered_data)
+    lm_small = lm(WinPct ~ runDifferential, data=mlb_lm_year_filtered_data)
     
     (mlb_lm_anova = anova(lm_small, mlb_lm_both_bic))
     mlb_lm_anova_p_val = mlb_lm_anova$`Pr(>F)`[2]
@@ -422,17 +422,17 @@ The appendix section should contain code and analysis that are used but that may
 ```{r,warning=FALSE,message=FALSE}
 n = nrow(mlb_lm_data)
 mlb_lm_fore_start = lm(WinPct ~ 1, data = mlb_lm_data)
-mlb_lm_fore_bic = step(mlb_lm_fore_start, WinPct ~ AB + I(AB^2) + H + I(H^2) + X2B + I(X2B^2) + X3B + I(X3B^2) + HR + I(HR^2) + BB + I(BB^2) + SO + I(SO^2) + SB + I(SB^2) + CS + I(CS^2) + HBP + I(HBP^2) + SF + I(SF^2) + ER + I(ER^2) + CG + I(CG^2) + SHO + I(SHO^2) + SV + I(SV^2) + IPouts + I(IPouts^2) + HA + I(HA^2) + HRA + I(HRA^2) + BBA + I(BBA^2) + SOA + I(SOA^2) + E + I(E^2) + DP + I(DP^2) + FP + I(FP^2) + attendance + I(attendance^2) + BPF + I(BPF^2) + PPF + I(PPF^2) + pctSalary + I(pctSalary^2) + runDifferiential + I(runDifferiential^2), direction = "forward", k = log(n), trace = 0)
+mlb_lm_fore_bic = step(mlb_lm_fore_start, WinPct ~ AB + I(AB^2) + H + I(H^2) + X2B + I(X2B^2) + X3B + I(X3B^2) + HR + I(HR^2) + BB + I(BB^2) + SO + I(SO^2) + SB + I(SB^2) + CS + I(CS^2) + HBP + I(HBP^2) + SF + I(SF^2) + ER + I(ER^2) + CG + I(CG^2) + SHO + I(SHO^2) + SV + I(SV^2) + IPouts + I(IPouts^2) + HA + I(HA^2) + HRA + I(HRA^2) + BBA + I(BBA^2) + SOA + I(SOA^2) + E + I(E^2) + DP + I(DP^2) + FP + I(FP^2) + attendance + I(attendance^2) + BPF + I(BPF^2) + PPF + I(PPF^2) + pctSalary + I(pctSalary^2) + runDifferential + I(runDifferential^2), direction = "forward", k = log(n), trace = 0)
 (mlb_lm_fore_bic_summary = summary(mlb_lm_fore_bic))
 
-mlb_lm_fore_bic = lm(formula = WinPct ~ runDifferiential + SV + I(BB^2) + CG + I(attendance^2), data = mlb_lm_year_filtered_data)
+mlb_lm_fore_bic = lm(formula = WinPct ~ runDifferential + SV + I(BB^2) + CG + I(attendance^2), data = mlb_lm_year_filtered_data)
 anova(mlb_lm_both_bic, mlb_lm_fore_bic)
 ```
 
 #### Compare models
 
 ```{r}
-bigger_model = lm(WinPct ~ runDifferiential + SV + I(BB^2) + BB + CG + I(attendance^2) + pctSalary, data = mlb_lm_year_filtered_data)
+bigger_model = lm(WinPct ~ runDifferential + SV + I(BB^2) + BB + CG + I(attendance^2) + pctSalary, data = mlb_lm_year_filtered_data)
 anova(mlb_lm_both_bic, bigger_model)
 anova(mlb_lm_fore_bic, bigger_model)
 ```
