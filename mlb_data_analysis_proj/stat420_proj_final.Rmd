@@ -402,7 +402,7 @@ When considering the time period of 1985 to 2015 as a whole, money is positively
 
 ## The Pythagorean Theorem of Baseball
 
-The Pythagorean theorem of baseball is validated in this study. Since the run differential is statistically significant when trying to predict win percentage, it is clear that it codifies what it takes to be a winning team. Using the run differential is very useful when trying to determine the win percentage of a team (p-value < 2e-16, a high F-statistic 78.934, and an adjusted r-squared 0.8754); however, of greater importance is that the run differential highlights two parameters of interest, runs allowed (RA) and runs scored (R). 
+The Pythagorean theorem of baseball is validated in this study. Since the run differential is statistically significant when trying to predict win percentage, it is clear that it codifies what it takes to be a winning team. Using the run differential is very useful when trying to determine the win percentage of a team (p-value < 2e-16 and a high F-statistic); however, of greater importance is that the run differential highlights two parameters of interest, runs allowed (RA) and runs scored (R). 
 
 At its simplest, the run differential tells us teams that score more runs than they allow leads to a better win percentage. Although it may seem obvious on the face of it, digging a little deeper the run differential may tell more about how well a team is playing than from simply how many games were won. It is in this difference that highlights its power in determining how well a team is doing. If a team has a high run differential it is telling us that players can get on base and score and it also is telling us that that team can also play a good defense. This offers us a deeper analysis than simply games won.
 
@@ -414,7 +414,7 @@ The model
 
 # Appendix
 
-## Compare to larger model with quadratic terms
+## Model with Quadratic Terms
 
 The following section investigates the effect of adding quadratic terms in the regression model.
 
@@ -427,7 +427,7 @@ mlb_lm_fore_bic = step(mlb_lm_fore_start, WinPct ~ AB + I(AB^2) + H + I(H^2) + X
 (mlb_lm_fore_bic_summary = summary(mlb_lm_fore_bic))
 ```
 
-Recall that the model we choose in the main section is
+Recall that the model we chose in the main section is
 ```{r}
 mlb_lm_both_bic
 ```
@@ -443,11 +443,3 @@ Loocv RMSE Of main section Model
 ```
 
 Note that the LOOCV RMSE of the Quadratic Model is `r quad_loocv_rmse`, which is less than the main section model one, `r main_loocv_rmse`.  This means that the Quadratic Model is better in predicting win percentage.  However, we kept the main model as it is much simpler.
-
-#### Compare models
-
-```{r}
-bigger_model = lm(WinPct ~ runDifferential + SV + I(BB^2) + BB + CG + I(attendance^2) + pctSalary, data = mlb_lm_year_filtered_data)
-anova(mlb_lm_both_bic, bigger_model)
-anova(mlb_lm_fore_bic, bigger_model)
-```
