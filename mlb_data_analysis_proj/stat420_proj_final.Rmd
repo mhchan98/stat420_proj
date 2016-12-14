@@ -1,0 +1,210 @@
+---
+title: 'STAT 420: Data Analysis Project, Fall 2016'
+author: "Aaron Ray (aaronwr2), Aaron Rogers (aaronrr2), Michael Chan (mhchan3), Michael Johnson (mjohns44)"
+date: 'Monday, November 14, 2016'
+output:
+  html_document:
+    toc: yes
+---
+
+# Analysis Proposal
+
+## Project Members
+
+- Aaron Ray (aaronwr2)
+- Aaron Rogers (aaronrr2)
+- Michael Chan (mhchan3)
+- Michael Johnson (mjohns44)
+
+## Proposed title for the project
+
+**A Statistical Approach to Predicting Major League Baseball Team Success**
+
+## Project Description
+
+Major League Baseball was the first introduction many people in the United States had to the field of statistics.  To this day, children and adults alike recite batting averages for their favorite players, measure pitchers by their earned run average, and talk about how much money specific players earn.  Everyday people have spirited debates about baseball statistics, arguing for their own theories of which statistics predict victory on the baseball field. 
+
+This project will parse over 140 years of data to find which combinations of baseball statistics have been the most accurate in predicting the championship team.
+
+## Description of Dataset
+
+The source of the data for this project: http://www.seanlahman.com/baseball-archive/statistics/
+
+This dataset contains pitching, hitting, and fielding statistics for Major League Baseball from 1871 through 2015.  It includes data from the two current leagues (American and National), the four other "major" leagues (American Association, Union Association, Players League, and Federal League), and the National Association of 1871-1875. For more details, see [readme2014.txt](http://seanlahman.com/files/database/readme2014.txt)
+
+### Potential Response Variables
+
+- `Rank`           Position in final standings
+- `WSWin`          World Series Winner (Y or N)
+- `LgWin`          League Champion(Y or N)
+
+### Selected Predictor Variables
+
+- `yearID`         Year
+- `W`              Wins
+- `L`              Losses
+- `salary`         Total Salary of the team
+- `totalSalary`    Total Salary of all teams in that year
+- `pctSalary`      Total Salary of the team as a proportion of the total salary of all teams in that year
+
+## Analysis Ideas
+
+Find out which predictors are useful for predicting rank or winning the Championship - % Salaries, Wins, Losses, etc.  The project will explore the effectiveness of different models (linear, polynomial, additive, and interaction).
+
+## Sample Data
+
+The following `R` code loads the `Teams.csv` and `Salaries.csv`. Some data manipulation is performed to compute the total salary and the percent of total salary.
+
+```{r}
+teams = read.csv("Teams.csv")
+salaries = read.csv("Salaries.csv")
+
+# Add pctSalary
+salries_by_team_year = aggregate(x=salaries$salary, by = list(salaries$teamID, salaries$yearID), FUN=sum)
+colnames(salries_by_team_year) = c("teamID", "yearID", "salary")
+
+mlb_data = merge(teams, salries_by_team_year, by=c("yearID", "teamID") )
+mlb_data$salary = as.numeric(mlb_data$salary)
+
+total_salary_by_year = aggregate(mlb_data$salary, by = list(mlb_data$yearID), FUN=sum)
+colnames(total_salary_by_year) = c("yearID", "totalSalary")
+
+mlb_data = merge(mlb_data, total_salary_by_year, by = c("yearID"))
+mlb_data$pctSalary = mlb_data$salary / mlb_data$totalSalary
+
+# Add winPct
+mlb_data$WinPct = mlb_data$W/mlb_data$G
+
+```
+
+### Add run differential. 
+
+One of the hypothesis we want to test is whether the Pythagorean Theorem of Baseball holds.  The Pythagoream Theorem suggests the run differenial is a good predictor of win percentage
+
+See http://www.baseball-reference.com/bullpen/Pythagorean_Theorem_of_Baseball
+
+```{r}
+mlb_data$runDifferiential = mlb_data$R^2 / (mlb_data$R^2 + mlb_data$RA^2)
+```
+
+
+### Only use from Modern Era
+```{r}
+mlb_data = mlb_data[mlb_data$yearID>2000,]
+head(mlb_data)
+```
+
+### Identify predictors that have potential prediction values in the dataset
+
+#### Remove variables that are descriptive
+```{r}
+mlb_lm_data = mlb_data[, setdiff(colnames(mlb_data), c("yearID", "teamID", "lgID", "franchID", "divID", "teamIDBR", "teamIDlahman45", "teamIDretro", "park", "name"))]
+head(mlb_lm_data)
+
+```
+
+#### Remove variables that are essentially other repsonses
+```{r}
+mlb_lm_data = mlb_lm_data[, setdiff(colnames(mlb_lm_data), c("L", "Rank", "DivWin", "WCWin", "LgWin", "WSWin"))]
+head(mlb_lm_data)
+
+```
+
+#### Remove variables that are linearly dependent
+```{r}
+mlb_lm_data = mlb_lm_data[, setdiff(colnames(mlb_lm_data), c("salary", "totalSalary", "W", "ERA"))]
+head(mlb_lm_data)
+```
+
+#### Remove variables that are relatively the same across all teams
+```{r}
+mlb_lm_data = mlb_lm_data[, setdiff(colnames(mlb_lm_data), c("G", "Ghome"))]
+head(mlb_lm_data)
+
+```
+
+#### Remove variables that are used to calculate run differential
+```{r}
+
+mlb_lm_data = mlb_lm_data[, setdiff(colnames(mlb_lm_data), c("R", "RA"))]
+head(mlb_lm_data)
+```
+
+### Use Vif to investigate the correlation of variables
+```{r}
+library(faraway)
+vif(mlb_lm_data)
+```
+
+There are a number of variables with high VIF.  Therefore, we expect the model selection process will eliminate a large number of those variables.
+
+## Use Forward BIC to find a "good" model
+```{r}
+mlb_lm = lm(WinPct ~ . ^ 2, data=mlb_lm_data)
+n = length(resid(mlb_lm))
+mlb_lm_fore_bic = step(lm(WinPct ~ 1, data=mlb_lm_data), WinPct ~ (AB+H+X2B+X3B+HR+BB+SO+SB+CS+HBP+SF+ER+CG+SHO+SV+IPouts+HA+HRA+BBA+SOA+E+DP+FP+attendance+BPF+PPF+pctSalary+runDifferiential) ^ 2, direction = "forward", k = log(n), trace = 0)
+(mlb_lm_fore_bic_summary = summary(mlb_lm_fore_bic))
+
+```
+
+The Model selection process using forward BIC selected a relative small model.  As expected, the `runDifferiential` is a good predictor of the win percentage.  The p-val also shows that it is very significant.  The other predictors are `SV`- `Saves`, `BB` - `Walks by batters`, `CG` - `Complete games` and `pctSalary` - `The percentage of salary`.  Of the predictors, the `runDifferiential` and `pctSalary` have the greatest prediction power.
+
+## Assumption Analysis
+```{r echo=FALSE}
+library(lmtest)
+
+plotResidual = function(lmModel, pointcol="dodgerblue", linecol="darkorange") {
+  plot(fitted(lmModel),
+       resid(lmModel),
+       col = pointcol,
+       xlab = "Fitted",
+       ylab = "Residuals"
+       )
+abline(h = 0, col = linecol, lwd = 2)
+}
+
+plotQQ = function(lmModel, pointcol="dodgerblue", linecol="darkorange") {
+  qqnorm(resid(lmModel), main = "Normal Q-Q Plot", col = pointcol)
+  qqline(resid(lmModel), col = linecol, lwd = 2)
+}
+calc_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+```
+
+### Constant Variance Assumption
+
+#### Fitted versus Residuals Plot
+```{r}
+plotResidual(mlb_lm_fore_bic)
+
+```
+
+#### Breusch-Pagan Test
+
+```{r}
+(bptest_mlb_lm_fore_bic = bptest(mlb_lm_fore_bic))
+```
+
+From the Breusch-Pagan test, the p-val, `r bptest_mlb_lm_fore_bic$p.value` , is relatively large, which means we cannot reject the null hypothesis of Homoscedasticity (constant variance.)  In addition, the residual plots show the spread of residuals are evenly distributed.  There, we conclude that the constant variance is not violated.
+
+### Normality Assumption
+
+#### Normal Q-Q Plot
+```{r}
+plotQQ(mlb_lm_fore_bic)
+```
+
+#### Shapiro-Wilk Test
+
+```{r}
+(shapiro_mlb_lm_fore_bic = shapiro.test(resid(mlb_lm_fore_bic)))
+```
+
+The normality assumption for this model has not been violated.  From the q-q plot, the residuals are more or less on the qqline.  From the Shapiro-Wilk Test, the p value, `r shapiro_mlb_lm_fore_bic$p.value`, is large, hence, we cannot reject the null hypothesis of the data following a normal distribution.
+
+
+
+
+
+
