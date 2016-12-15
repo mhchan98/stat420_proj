@@ -329,6 +329,7 @@ abline(h = 0.128, lwd = 2, col = "red")
 The Pythagorean Theorem of Baseball states that the pct win can be predicted by runDifferential.  The quickest way to get an idea of the relationship between them is to plot it out.
 
 ```{r}
+summary(runDifferential_model)
 plot(WinPct~ runDifferential, data = mlb_lm_data, col = "darkgreen")
 ```
 
@@ -364,7 +365,7 @@ plotQQ = function(lmModel, pointcol="dodgerblue", linecol="darkorange") {
   qqnorm(resid(lmModel), main = "Normal Q-Q Plot", col = pointcol)
   qqline(resid(lmModel), col = linecol, lwd = 2)
 }
-
+summary(mlb_lm_both_bic)
 ```
 
 
