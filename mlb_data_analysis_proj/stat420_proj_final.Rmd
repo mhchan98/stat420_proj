@@ -446,11 +446,13 @@ It would be interesting for futher analysis to see how individual player statist
 
 As shown in the Results section, the stepwise BIC method produced a model for predicting the Win Percentage with just 5 predictors: `runDifferential`, `SV`, `BB`, `CG` and `pctSalary`.  
   
-This model has an adjusted $R^2$ of 0.9287, so these 5 predictors can explain on average 92.9% of a team’s Winning Percentage.  This is significantly better than the 12.8% for the `pctSalary` model (which only considers a team’s payroll).  We also saw in the study Results that when we performed an Analysis of Variance, this model with 5 predictors is significantly better than the model that just uses the `runDifferential` model (the Pythagorean Theorem of Baseball).
+This model has an adjusted $R^2$ of 0.9287, so these 5 predictors can explain on average 92.9% of a team’s Winning Percentage.  This is significantly better than the 12.8% for the `pctSalary` model (which only considers a team’s payroll).  We also saw in the Results section that when we performed an Analysis of Variance (ANOVA), this model with 5 predictors is significantly better than the model that just uses the `runDifferential` model (the Pythagorean Theorem of Baseball).
 
-### Interpretation of the model
+### Interpretation of the Model - The 5 Key Predictors
 
 To make this model meaningful, consider an average Major League Baseball team.  The team plays 162 games per season.  An average team would win as often as it loses, so it would have a .500 Win Percentage (81 wins and 81 losses).  If this team wanted to improve to a .600 win percentage (97 wins and 65 losses), that record would typically be good enough to qualify to advance to the post-season play-offs.  
+
+According to the model, what is the difference between an average team and a play-off team?
 
 Looking at the coefficients of the model:
 
@@ -458,7 +460,7 @@ Looking at the coefficients of the model:
 coef(mlb_lm_both_bic)
 ```
 
-Consider a hypothetical average team keeping the 5 predictor variables constant except for one: 
+We will consider what it would take (and if it is even possible) for a hypothetical average team to keep 4 of the predictor variables constant and improve just 1. 
 
 **runDifferential - Run Differential**
 
@@ -468,7 +470,7 @@ An increase of 1 `runDifferential` would increase the `WinPct` by 0.750.  To mak
 Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{682^2}{682^2 + 682^2} = 0.500
 \]
 
-Solving this equaltion in reverse, for the hypothetical average team to increase their Win Percentage from .500 to .600, the team needs to increase the Run Differential by .133 to .633.  This means the team would need to score 896 Runs in a season, while still holding 682 Runs Allowed, and the same number of Saves, Walks, Complete Games, and Salary Percentage:
+Solving this equaltion in reverse, for the hypothetical average team needs to increase the Run Differential by .133 to .633 to increase their Win Percentage from .500 to .600.  One way this could happen is if the team scored 896 Runs in a season while still holding 682 Runs Allowed, and the same number of Saves, Walks, Complete Games, and Salary Percentage:
 
 \[
 Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{896^2}{896^2 + 682^2} = 0.633
@@ -480,17 +482,35 @@ Could a team score an additional 214 runs in a season (a 31% increase) without i
 
 A Save generally occurs when a relief pitcher enters the game when his team is leading by 1-3 runs and preserves the lead to the end of the game.  (For a complete definition, see http://www.baseball-reference.com/bullpen/Save).  
 
-In this model, one extra Save per year would result in an average increase in the Win Percentage of .0027.  A team with a .500 Win Percentage could increase to .600 if it had 37.5 more Saves in a season.  In practice, this means an average team would need to add an All-Star "closer" - a pitcher who is an expert at getting saves.  Per our dataset, teams avarage 23.7 Saves per year, and the range of Saves is from 0 to 68.  An increase of 37.5 saves over the mean of 23.7 is 61.2, which is within the historical realm. 
+In this model, one extra Save per year would result in an average increase in the Win Percentage of .0027.  A team with a .500 Win Percentage could increase to .600 if it had 37.5 more Saves in a season.  In practice, this means an average team would need to add an All-Star "closer" - a pitcher who is an expert at getting saves.  Per our dataset, teams avarage 23.7 Saves per year, and the range of Saves is from 0 to 68.  An increase of 37.5 saves over the mean of 23.7 is 61.2 saves, which is within the historical range. 
 
 It is theoretically possible that a team could hire one or more players to increase their Saves from 24 to 61 while holding constant the other variables (Run Differential, BB (Walks), Complete Games and Salary Percentage).  Perhaps a team could develop such pitchers through its minor league system and thereby hire them at lower than market salaries.
 
 **BB - Bases on Balls (Walks)**
 
+If a team increases its `BB` (Walks) by 1 in a season, the model says the Win Percentage would increase on average by .0000573.  This means for a team with a Win Percentage of .500 to increase to .600, it would need an extra 1,745 Walks per season.  The maximum `BB` per year in the dataset is 835, so this is an unrealistic goal for any team.
 
-**CG - Complete Games pitched**
+**CG – Complete Games pitched**
 
-**pctSalary - Percentage of the Major League Baseball total player salary paid by one team**
+A Complete Game is recorded when one pitcher throws for the entire game – usually 9 innings.  The mean `CG` from the dataset is 50.5, and the range is from 0 to an amazing 148.  
 
+According to the model, one extra Complete Game in a team’s year would on average increase the Win Percentage by .0011.  For a .500 team to improve to become a .600 team, it would need an additional 91 Complete Games.  While this is theoretically possible, a Complete Game is typically thrown by an especially competent pitcher with high physical stamina.  To add 91 Complete Games, a team would likely need 4 to 6 such pitchers, each of whom would likely be All-Star quality.  It is therefore very unlikely that a team could hire such pitchers without vastly increasing its Salary Percentage.
+
+**pctSalary – Percentage of the Major League Baseball salary paid by one team**
+
+Per the model, the coefficient for the `pctSalary` is .2385.  For a team with a Win Percentage of .500 to increase to .600, the model says it would need to increase its Percentage of total Salary by 0.02385.  
+
+To put this in perspective, consider that the total salaries of all 30 MLB teams was $3,514,142,569 in 2015. The range was $61.8M to $215.8M.  With 30 teams, the mean Salary Percentage is 0.0333, which is $117.1M.  Assuming that the average team has a .500 Win Percentage and a 0.0333 Salary Percentage, the model suggests that a .600 Win Percentage would require a 0.0572 Salary Percentage.  This means an increase in payroll from $117.1M to $201.0M, with no change to Run Differential, Saves, BB (Walks) and Complete Games.
+
+Obviously this is a logical fallacy.  Paying more money for the same results in the other significant categories will not win more ball games.  
+ 
+### How then Shall We Interpret This Model?
+
+With an Adjusted $R^2$ = 0.9287, this is a good model.  However, a given baseball statistic is not easy to change in isolation from all others.  As we saw in the VIF analysis, there is multicollinearity among several variables.  Most of the variables were excluded to find the 5 that best represent the qualities in a baseball team that contribute to winning more games. 
+
+From a high level perspective, it is telling that 2 of the 5 statistics are for defense (Complete Games and Saves), 2 are for offense (Run Differential and Walks), and 1 is for payroll.  As established in Topic 1, there is a strong correlation between a team’s payroll and its Win Percentage.  When a team is well managed, we expect a team of players who command higher salaries to yield more runs scored and fewer runs allowed.  We expect a higher payroll to yield better pitchers and better batters. 
+
+Perhaps the most surprising results are the inclusion of Walks, Saves and Complete Games over other statistics that could have been predictors.  Anecdotally, when one thinks of a successfully ball club, one thinks of players who not only drive in runs (the `RunDifferential` predictor), but who also get on base often (the `BB` predictor).  One thinks of a championship-caliber team as having an ace closer (the `SV` predictor) and a solid starting pitching rotation (the `CG` predictor).  These are key differences between good teams and great teams, and most often these are qualities that come with a high price tag (the `pctSalary` predictor).
 
 # Appendix
 
