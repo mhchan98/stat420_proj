@@ -443,7 +443,24 @@ It would be interesting for futher analysis to see how individual player statist
 
 ## A Good Model For Predicting a Team's Win Percentage
 
-The model 
+As shown in the Results section, the stepwise BIC method produced a model for predicting the Win Percentage with just 5 predictors: `runDifferential`, `SV`, `BB`, `CG` and `pctSalary`.  
+  
+This model has an adjusted $R^2$ of 0.9287, so these 5 predictors can explain on average 92.9% of a team’s Winning Percentage.  This is significantly better than the 12.8% for the `pctSalary` model (which only considers a team’s payroll).  We also saw in the study Results that when we performed an Analysis of Variance, this model with 5 predictors is significantly better than the model that just uses the `runDifferential` model (the Pythagorean Theorem of Baseball).
+
+### Interpretation of the model
+
+A Major League Baseball team generally plays 162 games per season.  A team with a .500 Win Percentage has 81 wins and 81 losses.  A team with a .600 win percentage has 97 wins and 65 losses, which is generally a good enough record to be eligible to advance to the post-season play-offs.  
+
+Looking at the coefficients, if a team could keep all variables constant and change one thing:
+
+**runDifferential**
+An increase of 1 `runDifferential` would increase the `WinPct` by 0.750.  To make this more meaningful, consider that the average runs per team per season is 682, and the average runs allowed is 682.  The Run Differential (the Pythagorean Theorem of Baseball) is equal to the Win Percentage, which is hypothetically .500 for an average team.   
+
+\[
+Win \% = Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{682^2}{682^2 + 682^2} = 0.500
+\]
+
+Solving this equaltion in reverse, 
 
 # Appendix
 
