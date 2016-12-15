@@ -432,7 +432,7 @@ num_high_leverage / num_data
 
 ## The Money Effect
 
-When considering the time period of 1985 to 2015 as a whole, money is positively related to Win Percentage.  The amount of money a team spends on player salaries in relation to other teams has a significant relationship to that team's Win Percentage.  However, this is not the only consderation.  Over this time period, team payroll relative to MLB payroll can explain on average only 12.8% of a team's Winning Percentage.  As we would expect, this effect fluctuates when we consider each year individually.  This "Money Effect" ranges from 0.0% to 43.5%, and is greater than 10% for 22 of the 31 years of data.  These results suggest there are better ways to predict Win Percentage.
+When considering the time period of 1985 to 2015 as a whole, money is positively related to Win Percentage.  The amount of money a team spends on player salaries in relation to other teams has a significant relationship to that team's Win Percentage.  However, this is not the only consideration.  Over this time period, team payroll relative to MLB payroll can explain on average only 12.8% of a team's Winning Percentage.  As we would expect, this effect fluctuates when we consider each year individually.  This "Money Effect" ranges from 0.0% to 43.5%, and is greater than 10% for 22 of the 31 years of data.  These results suggest there are better ways to predict Win Percentage.
 
 ## The Pythagorean Theorem of Baseball
 
@@ -440,7 +440,7 @@ The Pythagorean theorem of baseball is validated in this study. Since the run di
 
 At its simplest, the run differential tells us teams that score more runs than they allow leads to a better win percentage. Although it may seem obvious on the face of it, digging a little deeper the run differential may tell more about how well a team is playing than from simply how many games were won. It is in this difference that highlights its power in determining how well a team is doing. If a team has a high run differential it is telling us that players can get on base and score and it also is telling us that that team can also play a good defense. This offers us a deeper analysis than simply games won.
 
-It would be interesting for futher analysis to see how individual player statistics for batting, pitching and fielding relate to the number of runs they score/allow, i.e., what player statistics contribute to a positive run differential. This would allow scouts to tie individuals to the run differential which is useful in constructing winning teams.
+It would be interesting for further analysis to see how individual player statistics for batting, pitching and fielding relate to the number of runs they score/allow, i.e., what player statistics contribute to a positive run differential. This would allow scouts to tie individuals to the run differential which is useful in constructing winning teams.
 
 ## A Good Model For Predicting a Team's Win Percentage
 
@@ -470,7 +470,7 @@ An increase of 1 `runDifferential` would increase the `WinPct` by 0.750.  To mak
 Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{682^2}{682^2 + 682^2} = 0.500
 \]
 
-Solving this equaltion in reverse, for the hypothetical average team needs to increase the Run Differential by .133 to .633 to increase their Win Percentage from .500 to .600.  One way this could happen is if the team scored 896 Runs in a season while still holding 682 Runs Allowed, and the same number of Saves, Walks, Complete Games, and Salary Percentage:
+Solving this equation in reverse, for the hypothetical average team needs to increase the Run Differential by .133 to .633 to increase their Win Percentage from .500 to .600.  One way this could happen is if the team scored 896 Runs in a season while still holding 682 Runs Allowed, and the same number of Saves, Walks, Complete Games, and Salary Percentage:
 
 \[
 Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{896^2}{896^2 + 682^2} = 0.633
@@ -482,7 +482,7 @@ Could a team score an additional 214 runs in a season (a 31% increase) without i
 
 A Save generally occurs when a relief pitcher enters the game when his team is leading by 1-3 runs and preserves the lead to the end of the game.  (For a complete definition, see http://www.baseball-reference.com/bullpen/Save).  
 
-In this model, one extra Save per year would result in an average increase in the Win Percentage of .0027.  A team with a .500 Win Percentage could increase to .600 if it had 37.5 more Saves in a season.  In practice, this means an average team would need to add an All-Star "closer" - a pitcher who is an expert at getting saves.  Per our dataset, teams avarage 23.7 Saves per year, and the range of Saves is from 0 to 68.  An increase of 37.5 saves over the mean of 23.7 is 61.2 saves, which is within the historical range. 
+In this model, one extra Save per year would result in an average increase in the Win Percentage of .0027.  A team with a .500 Win Percentage could increase to .600 if it had 37.5 more Saves in a season.  In practice, this means an average team would need to add an All-Star "closer" - a pitcher who is an expert at getting saves.  Per our dataset, teams average 23.7 Saves per year, and the range of Saves is from 0 to 68.  An increase of 37.5 saves over the mean of 23.7 is 61.2 saves, which is within the historical range. 
 
 It is theoretically possible that a team could hire one or more players to increase their Saves from 24 to 61 while holding constant the other variables (Run Differential, BB (Walks), Complete Games and Salary Percentage).  Perhaps a team could develop such pitchers through its minor league system and thereby hire them at lower than market salaries.
 
