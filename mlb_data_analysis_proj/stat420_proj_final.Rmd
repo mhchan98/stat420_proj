@@ -450,18 +450,47 @@ This model has an adjusted $R^2$ of 0.9287, so these 5 predictors can explain on
 
 ### Interpretation of the model
 
-A Major League Baseball team generally plays 162 games per season.  A team with a .500 Win Percentage has 81 wins and 81 losses.  A team with a .600 win percentage has 97 wins and 65 losses, which is generally a good enough record to be eligible to advance to the post-season play-offs.  
+To make this model meaningful, consider an average Major League Baseball team.  The team plays 162 games per season.  An average team would win as often as it loses, so it would have a .500 Win Percentage (81 wins and 81 losses).  If this team wanted to improve to a .600 win percentage (97 wins and 65 losses), that record would typically be good enough to qualify to advance to the post-season play-offs.  
 
-Looking at the coefficients, if a team could keep all variables constant and change one thing:
+Looking at the coefficients of the model:
 
-**runDifferential**
-An increase of 1 `runDifferential` would increase the `WinPct` by 0.750.  To make this more meaningful, consider that the average runs per team per season is 682, and the average runs allowed is 682.  The Run Differential (the Pythagorean Theorem of Baseball) is equal to the Win Percentage, which is hypothetically .500 for an average team.   
+```{r} 
+coef(mlb_lm_both_bic)
+```
+
+Consider a hypothetical average team keeping the 5 predictor variables constant except for one: 
+
+**runDifferential - Run Differential**
+
+An increase of 1 `runDifferential` would increase the `WinPct` by 0.750.  To make this more meaningful, consider that the average runs per team per season is 682, and the average runs allowed is 682.  The Run Differential is defined as follows:
 
 \[
-Win \% = Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{682^2}{682^2 + 682^2} = 0.500
+Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{682^2}{682^2 + 682^2} = 0.500
 \]
 
-Solving this equaltion in reverse, 
+Solving this equaltion in reverse, for the hypothetical average team to increase their Win Percentage from .500 to .600, the team needs to increase the Run Differential by .133 to .633.  This means the team would need to score 896 Runs in a season, while still holding 682 Runs Allowed, and the same number of Saves, Walks, Complete Games, and Salary Percentage:
+
+\[
+Run Differential = \frac{Runs Scored^2}{Runs Scored^2 + Runs Allowed^2} = \frac{896^2}{896^2 + 682^2} = 0.633
+\]
+
+Could a team score an additional 214 runs in a season (a 31% increase) without increasing salaries, Saves, Walks or Complete Games?  This is doubtful.  This level of increase in Runs Scored would certainly mean better batters, who would command higher salaries.  These batters would also likely have more Bases on Balls (`BB` or Walks), so it would be difficult to change the Run Differential without also changing the values of the other predictor variables.
+
+**SV - Saves**
+
+A Save generally occurs when a relief pitcher enters the game when his team is leading by 1-3 runs and preserves the lead to the end of the game.  (For a complete definition, see http://www.baseball-reference.com/bullpen/Save).  
+
+In this model, one extra Save per year would result in an average increase in the Win Percentage of .0027.  A team with a .500 Win Percentage could increase to .600 if it had 37.5 more Saves in a season.  In practice, this means an average team would need to add an All-Star "closer" - a pitcher who is an expert at getting saves.  Per our dataset, teams avarage 23.7 Saves per year, and the range of Saves is from 0 to 68.  An increase of 37.5 saves over the mean of 23.7 is 61.2, which is within the historical realm. 
+
+It is theoretically possible that a team could hire one or more players to increase their Saves from 24 to 61 while holding constant the other variables (Run Differential, BB (Walks), Complete Games and Salary Percentage).  Perhaps a team could develop such pitchers through its minor league system and thereby hire them at lower than market salaries.
+
+**BB - Bases on Balls (Walks)**
+
+
+**CG - Complete Games pitched**
+
+**pctSalary - Percentage of the Major League Baseball total player salary paid by one team**
+
 
 # Appendix
 
